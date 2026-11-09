@@ -151,7 +151,7 @@
     ctx:null, analyser:null, stream:null, buf:null, running:false, locked:false,
     weighting:"A", response:"fast", offset:100, hold:false,
     db:new Float32Array(NB), peaks:new Float32Array(NB).fill(-200),
-    spl:0, maxSpl:0, leqSum:0, leqN:0, lastT:0, raf:0
+    spl:0, splPow:0, maxSpl:0, leqSum:0, leqT:0, lastT:0, raf:0
   };
   const $ = id => document.getElementById(id);
   const dbToPow = d => Math.pow(10, d/10);
@@ -265,12 +265,15 @@
       totalPow += bandPow[i]*dbToPow(W[i]);   // dbToPow already divides by 10
     }
 
-    const splRaw = totalPow>0 ? 10*Math.log10(totalPow)+S.offset : 0;
-    S.spl = S.spl===0 ? splRaw : S.spl+(splRaw-S.spl)*alpha;
-    if(S.spl>S.maxSpl) S.maxSpl=S.spl;
+    // Fast/Slow time weighting averages sound power, not decibels. Averaging the
+    // dB values would under-read anything that is not steady.
+    S.splPow = S.splPow===0 ? totalPow : S.splPow+(totalPow-S.splPow)*alpha;
+    S.spl = S.splPow>0 ? 10*Math.log10(S.splPow)+S.offset : 0;
+    if(S.spl>S.maxSpl) S.maxSpl=S.spl;   // Max = highest time-weighted level
 
-    // Leq over the session
-    S.leqSum += dbToPow(S.spl/10); S.leqN++;
+    // Leq over the session: time-weighted mean of the unsmoothed power, so it is
+    // independent of the Fast/Slow setting and of the frame rate.
+    S.leqSum += totalPow*dt; S.leqT += dt;
     S.lastT=performance.now();
 
     // peak hold with slow decay
@@ -289,7 +292,7 @@
     // paint text
     $("spl").textContent = S.spl? S.spl.toFixed(1) : "--.-";
     $("maxspl").textContent = S.maxSpl? S.maxSpl.toFixed(1) : "--.-";
-    const leq = S.leqN? 10*Math.log10(S.leqSum/S.leqN) : 0;
+    const leq = S.leqSum>0 ? 10*Math.log10(S.leqSum/S.leqT)+S.offset : 0;
     $("leq").textContent = leq? leq.toFixed(1) : "--.-";
     const peakBand = CENTERS[bestPeak()];
     $("bandtxt").textContent = lbl(Math.round(peakBand));
@@ -371,6 +374,7 @@
       src.connect(a);
       S.analyser=a; S.buf=new Float32Array(a.frequencyBinCount);
       S.db=new Float32Array(NB).fill(-200);
+      S.spl=0; S.splPow=0; S.maxSpl=0; S.leqSum=0; S.leqT=0;
       S.running=true; S.lastT=0;
       $("start").style.display="none";
       $("status").textContent="live"; $("status").classList.add("live");
@@ -416,7 +420,7 @@
     S.hold=!S.hold; $("holdBtn").classList.toggle("on",S.hold);
   });
   $("resetBtn").addEventListener("click",()=>{
-    S.peaks.fill(-200); S.maxSpl=0; S.leqSum=0; S.leqN=0;
+    S.peaks.fill(-200); S.maxSpl=0; S.leqSum=0; S.leqT=0;
   });
   $("calBtn").addEventListener("click",()=>{
     const p=$("calPanel"); const open=p.classList.toggle("show");

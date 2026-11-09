@@ -150,7 +150,7 @@
   const S = {
     ctx:null, analyser:null, stream:null, buf:null, running:false, locked:false,
     weighting:"A", response:"fast", offset:100, hold:false,
-    db:new Float32Array(NB), peaks:new Float32Array(NB).fill(-200),
+    db:new Float32Array(NB), pw:new Float64Array(NB), peaks:new Float32Array(NB).fill(-200),
     spl:0, splPow:0, maxSpl:0, leqSum:0, leqT:0, lastT:0, raf:0
   };
   const $ = id => document.getElementById(id);
@@ -239,15 +239,19 @@
     // per third-octave band power: TOTAL energy in the band, not a per-bin average.
     // Averaging would tilt the display downward with frequency, because wider
     // high bands contain more bins than narrow low bands.
-    const bandPow=new Float32Array(NB);
+    // Bin k covers (k-0.5 .. k+0.5)*binHz. A bin that straddles a band edge is
+    // split between the two bands in proportion to the overlap, so no energy is
+    // counted twice or dropped, and a band narrower than one bin (the lowest
+    // bands, or any band at high sample rates) still gets its share.
+    const bandPow=new Float64Array(NB);
     for(let i=0;i<NB;i++){
-      const [fl,fh]=EDGES[i];
-      // ceil/floor keeps bands non-overlapping, so a bin is never counted twice.
-      // Below roughly 40 Hz a band can be narrower than one bin; those bands stay
-      // empty rather than borrowing a neighbour's energy.
-      const lo=Math.max(1,Math.ceil(fl/binHz)), hi=Math.min(half-1,Math.floor(fh/binHz));
+      const a=EDGES[i][0]/binHz, b=EDGES[i][1]/binHz;
+      const lo=Math.max(1,Math.floor(a+0.5)), hi=Math.min(half-1,Math.floor(b+0.5));
       let sum=0;
-      for(let k=lo;k<=hi;k++){ sum+=dbToPow(S.buf[k]); }
+      for(let k=lo;k<=hi;k++){
+        const part=Math.min(b,k+0.5)-Math.max(a,k-0.5);
+        if(part>0) sum+=dbToPow(S.buf[k])*part;
+      }
       bandPow[i]=sum;
     }
 
@@ -259,8 +263,9 @@
     const W = S.weighting==="A"?A_W:(S.weighting==="C"?C_W:Z_W);
     let totalPow=0;
     for(let i=0;i<NB;i++){
-      const dbspl = bandPow[i]>0 ? 10*Math.log10(bandPow[i])+S.offset : -200;
-      if(S.db[i]<=-200) S.db[i]=dbspl; else S.db[i]+=(dbspl-S.db[i])*alpha;
+      // bars get the same power-domain Fast/Slow averaging as the SPL readout
+      S.pw[i] = S.pw[i]===0 ? bandPow[i] : S.pw[i]+(bandPow[i]-S.pw[i])*alpha;
+      S.db[i] = S.pw[i]>0 ? 10*Math.log10(S.pw[i])+S.offset : -200;
       // weighted SPL contribution
       totalPow += bandPow[i]*dbToPow(W[i]);   // dbToPow already divides by 10
     }
@@ -373,7 +378,7 @@
       a.fftSize=8192; a.smoothingTimeConstant=0; a.minDecibels=-140; a.maxDecibels=0;
       src.connect(a);
       S.analyser=a; S.buf=new Float32Array(a.frequencyBinCount);
-      S.db=new Float32Array(NB).fill(-200);
+      S.db=new Float32Array(NB).fill(-200); S.pw=new Float64Array(NB);
       S.spl=0; S.splPow=0; S.maxSpl=0; S.leqSum=0; S.leqT=0;
       S.running=true; S.lastT=0;
       $("start").style.display="none";

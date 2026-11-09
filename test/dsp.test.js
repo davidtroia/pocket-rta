@@ -58,6 +58,7 @@ function feed(dbfs, freq){
 function setSpectrum(dbfs, freq){
   feed(dbfs, freq);
   S.db=new Float32Array(NB).fill(-200);
+  S.pw=new Float64Array(NB);
   S.peaks=new Float32Array(NB).fill(-200);
   S.spl=0; S.splPow=0; S.maxSpl=0; S.leqSum=0; S.leqT=0;
   S.lastT=0;
@@ -129,6 +130,23 @@ S.response='fast';
 // sound power, so the peak is 10*log10(1e6 + (1e9-1e6)*(1-exp(-0.1/0.125))) = 87.41
 setSpectrum(-40,1000); run(120); feed(-10,1000); run(6); feed(-40,1000); run(60);
 chk('Fast Max of a 100 ms 90 dB burst', shown('maxspl'), 87.41, 0.3);
+
+console.log('\n== band energy on flat noise ==');
+// With equal power in every FFT bin, a band's level depends only on how many
+// bins wide it is: -80 dBFS/bin + 10*log10(width in bins) + 100 dB offset.
+S.weighting='Z'; S.response='fast'; setSpectrum(-80,null); run();
+{
+  const binHz=48000/8192, w=f=>f*(Math.pow(2,1/6)-Math.pow(2,-1/6))/binHz;
+  for(const f of [20,25,31.5,1000,8000]){
+    const i=idxFor(f);
+    chk(`flat noise, ${f} Hz band`, S.db[i], 20+10*Math.log10(w(CENTERS[i])), 0.1);
+  }
+}
+
+console.log('\n== spectrum bars use Fast/Slow power averaging ==');
+// same 100 ms burst as the SPL test: the 1 kHz bar should reach 87.41 too
+setSpectrum(-40,1000); run(120); feed(-10,1000); run(6);
+chk('1 kHz bar after a 100 ms 90 dB burst', S.db[idxFor(1000)], 87.41, 0.3);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail?1:0);

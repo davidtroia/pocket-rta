@@ -1,0 +1,7 @@
+{
+  "name": "pocket-rta",
+  "private": true,
+  "scripts": {
+    "test": "node test/dsp.test.js"
+  }
+}

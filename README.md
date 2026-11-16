@@ -1,6 +1,6 @@
-# Pocket RTA by Balance Digital LLC — GUI prototype and asset pack (v1.0)
+# Balance Digital RTA (Balance Digital LLC) — GUI prototype and asset pack (v1.0)
 
-A working, mobile-first prototype of Pocket RTA, a measurement app for sound engineers, plus store-ready artwork.
+A working, mobile-first prototype of Balance Digital RTA, a measurement app for sound engineers, plus store-ready artwork.
 
 Live: https://davidtroia.github.io/pocket-rta/
 

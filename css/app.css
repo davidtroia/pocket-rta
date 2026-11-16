@@ -1,4 +1,4 @@
-/* Pocket RTA — Balance Digital LLC */
+/* Balance Digital RTA — Balance Digital LLC */
 @font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(../fonts/inter-latin-400-normal.woff2) format("woff2")}
 @font-face{font-family:Inter;font-weight:500;font-display:swap;src:url(../fonts/inter-latin-500-normal.woff2) format("woff2")}
 @font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(../fonts/inter-latin-600-normal.woff2) format("woff2")}
@@ -47,7 +47,7 @@ body.shot:not(.framed) .sb-island{display:none}
 .topbar{flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:9px}
 .brand-mark{width:28px;height:28px}
-.brand-name{font-family:Montserrat,var(--ui);font-weight:600;font-size:18px;letter-spacing:-.01em}
+.brand-name{font-family:Montserrat,var(--ui);font-weight:600;font-size:15px;white-space:nowrap;letter-spacing:-.01em}
 .brand-name b{font-weight:700;background:linear-gradient(90deg,var(--teal-hi),var(--lav-hi));-webkit-background-clip:text;background-clip:text;color:transparent}
 .top-right{display:flex;align-items:center;gap:10px}
 .inmeter-wrap{display:flex;align-items:center;gap:6px}
@@ -192,3 +192,4 @@ body.framed .tabbar,body.status .tabbar{height:82px;padding-bottom:18px}
 .toast.on{opacity:1;transform:none}
 .gen-spec{flex:1;min-height:96px;display:flex;flex-direction:column;padding:10px 12px 8px;gap:6px}
 .gen-spec .plot{border:0;border-radius:8px;min-height:60px}
+@media (max-width:380px){.inmeter-k{display:none}.brand-name{font-size:14px}}

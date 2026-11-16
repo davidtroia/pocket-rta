@@ -1,4 +1,4 @@
-/* Pocket RTA 1.0 — Balance Digital LLC
+/* Balance Digital RTA 1.0 — Balance Digital LLC
    Real-time analyzer, SPL meter, spectrogram and signal generator on the Web Audio API. */
 'use strict';
 (() => {

@@ -1,0 +1,8 @@
+{
+  // Serves the company site (the site/ folder) from Cloudflare. Nothing to build.
+  "name": "balancedigitalllc",
+  "compatibility_date": "2026-11-16",
+  "assets": {
+    "directory": "./site"
+  }
+}

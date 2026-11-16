@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0b">
+<meta name="theme-color" content="#050506">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Pocket RTA</title>
 <style>
   :root{
-    --bg:#0a0a0b; --panel:#141416; --line:#26262b;
-    --txt:#f2f2f4; --dim:#8b8b93; --accent:#38e07b; --warn:#ffb020; --bad:#ff4d4f;
+    --bg:#050506; --panel:#111114; --line:#1f1f24;
+    --txt:#f4f4f6; --dim:#7a7a84; --accent:#3ee0a0; --peak:#ff9a2e; --bad:#ff4d4f;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
@@ -18,50 +18,51 @@
     -webkit-user-select:none;user-select:none;overscroll-behavior:none}
   #app{display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 
-  header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px}
-  .brand{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
-  .status{font-size:11px;padding:4px 9px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
-  .status.live{color:var(--accent);border-color:rgba(56,224,123,.35)}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 4px}
+  .brand{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-weight:500}
+  .status{font-size:10px;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--dim);letter-spacing:.06em}
+  .status.live{color:var(--accent);border-color:rgba(62,224,160,.4)}
 
-  .readout{display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:2px 16px 0}
-  .spl{font-size:clamp(58px,17vw,104px);font-weight:200;line-height:.9;letter-spacing:-.03em;
-    font-variant-numeric:tabular-nums}
-  .unit{font-size:14px;color:var(--dim);padding-bottom:10px;letter-spacing:.08em}
-  .sub{display:flex;justify-content:space-between;gap:8px;padding:8px 18px 4px;font-size:12px;color:var(--dim)}
+  .readout{display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:0 16px 2px}
+  .spl{font-size:clamp(64px,19vw,112px);font-weight:200;line-height:.85;letter-spacing:-.04em;
+    font-variant-numeric:tabular-nums;color:#fff}
+  .unit{font-size:13px;color:var(--dim);padding-bottom:12px;letter-spacing:.1em;font-weight:500}
+
+  .sub{display:flex;justify-content:space-between;gap:6px;padding:6px 18px 2px;font-size:11px;color:var(--dim);letter-spacing:.04em}
   .sub b{color:var(--txt);font-weight:500;font-variant-numeric:tabular-nums}
 
-  .peakband{margin:6px 16px 0;padding:9px 12px;border:1px solid var(--line);border-radius:10px;
-    background:var(--panel);display:flex;justify-content:space-between;align-items:center;font-size:13px}
-  .peakband .f{font-size:18px;font-weight:500;font-variant-numeric:tabular-nums}
+  .peakband{margin:4px 16px 0;padding:8px 12px;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);display:flex;justify-content:space-between;align-items:center;font-size:12px}
+  .peakband .f{font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;color:#fff}
 
-  #scope{flex:1;min-height:0;display:block;width:100%;touch-action:none}
+  #scope{flex:1;min-height:0;display:block;width:100%;touch-action:none;background:linear-gradient(180deg,#050506 0%,#0a0a0c 100%)}
 
-  .disclaimerbar{text-align:center;font-size:10px;color:#5a5a62;letter-spacing:.05em;padding:0 0 2px}
-  .controls{display:flex;gap:8px;padding:8px 12px 4px;flex-wrap:wrap;justify-content:center}
-  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
-  .seg button{background:none;border:0;color:var(--dim);font-size:12px;padding:8px 11px;
-    font-family:inherit;letter-spacing:.04em}
-  .seg button.on{background:#232328;color:var(--txt)}
-  .btn{border:1px solid var(--line);background:var(--panel);color:var(--dim);border-radius:9px;
-    padding:8px 13px;font-size:12px;font-family:inherit;letter-spacing:.04em}
-  .btn.on{color:var(--warn);border-color:rgba(255,176,32,.4)}
+  .disclaimerbar{text-align:center;font-size:9px;color:#4a4a52;letter-spacing:.08em;padding:2px 0 0}
+  .controls{display:flex;gap:6px;padding:6px 12px 8px;flex-wrap:wrap;justify-content:center}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+  .seg button{background:none;border:0;color:var(--dim);font-size:11px;padding:7px 10px;
+    font-family:inherit;letter-spacing:.05em;transition:all .15s ease}
+  .seg button.on{background:#1c1c22;color:#fff}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--dim);border-radius:8px;
+    padding:7px 12px;font-size:11px;font-family:inherit;letter-spacing:.05em;transition:all .15s ease}
+  .btn.on{color:var(--peak);border-color:rgba(255,154,46,.45);background:#1a1612}
 
   .start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:18px;background:var(--bg);padding:28px;text-align:center;z-index:10}
-  .start h1{font-size:26px;font-weight:300;margin:0;letter-spacing:-.01em}
-  .start p{color:var(--dim);font-size:13px;line-height:1.55;max-width:32ch;margin:0}
-  .go{background:var(--accent);color:#06240f;border:0;border-radius:99px;padding:16px 34px;
-    font-size:16px;font-weight:600;font-family:inherit}
-  .err{color:var(--bad);font-size:13px;max-width:34ch;line-height:1.5}
-  .fineprint{color:#6d6d76;font-size:11px;line-height:1.6;max-width:36ch}
-  .diag{font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.55;color:#7c7c86;max-width:38ch;white-space:pre-wrap;word-break:break-word;text-align:left;margin-top:2px}
+    justify-content:center;gap:16px;background:var(--bg);padding:32px;text-align:center;z-index:10}
+  .start h1{font-size:28px;font-weight:300;margin:0;letter-spacing:-.02em}
+  .start p{color:var(--dim);font-size:13px;line-height:1.5;max-width:30ch;margin:0}
+  .go{background:var(--accent);color:#031a0e;border:0;border-radius:99px;padding:15px 36px;
+    font-size:15px;font-weight:600;font-family:inherit;letter-spacing:.02em}
+  .err{color:var(--bad);font-size:13px;max-width:34ch;line-height:1.45}
+  .fineprint{color:#5a5a64;font-size:11px;line-height:1.55;max-width:34ch}
+  .diag{font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:#6a6a74;max-width:36ch;white-space:pre-wrap;word-break:break-word;text-align:left;margin-top:4px}
   .cal{display:none;position:absolute;inset:auto 0 0 0;background:var(--panel);border-top:1px solid var(--line);
     padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:9}
   .cal.show{display:block}
-  .cal .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .cal .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
   .cal input[type=range]{width:100%;accent-color:var(--accent)}
-  .cal small{color:var(--dim);font-size:11px;line-height:1.5;display:block}
-  .mono{font-variant-numeric:tabular-nums;font-size:15px}
+  .cal small{color:var(--dim);font-size:11px;line-height:1.45;display:block}
+  .mono{font-variant-numeric:tabular-nums;font-size:14px}
 </style>
 </head>
 <body>
@@ -79,11 +80,11 @@
   <div class="sub">
     <div>Max <b id="maxspl">--.-</b></div>
     <div>Leq <b id="leq">--.-</b></div>
-    <div>Peak band <b id="bandtxt">--</b></div>
+    <div>Peak <b id="bandtxt">--</b></div>
   </div>
 
   <div class="peakband">
-    <div>Loudest now</div>
+    <div>Loudest</div>
     <div class="f" id="loudest">--</div>
   </div>
 
@@ -105,9 +106,9 @@
 
 <div class="start" id="start">
   <h1>Pocket RTA</h1>
-  <p>Spectrum analyzer and SPL meter for live sound. Tap start, allow the microphone, then point the phone at the room.</p>
-  <button class="go" id="goBtn">Start measuring</button>
-  <div class="fineprint">Audio is processed on this device only. Nothing is recorded, stored, or sent anywhere.<br><br>Not a certified measurement instrument. Readings depend on the microphone in your phone and the calibration offset.</div>
+  <p>Real-time analyzer and SPL meter. Point it at the room.</p>
+  <button class="go" id="goBtn">Start</button>
+  <div class="fineprint">Processed entirely on this device. Nothing is recorded or sent.<br>Not a certified instrument. Calibrate against a known reference.</div>
   <div class="diag" id="diag"></div>
   <div class="err" id="err"></div>
 </div>
@@ -118,20 +119,18 @@
     <div class="mono" id="calVal">100.0 dB</div>
   </div>
   <input type="range" id="calRange" min="70" max="135" step="0.5" value="100">
-  <small>Set a sound level meter next to the phone and match the reading. Or set a known reference: a 1 kHz tone at 94 dB SPL should read 94. Value is saved on this device.</small>
+  <small>Match a reference meter or a known 1 kHz tone. Saved on this device.</small>
 </div>
 
 <script>
 (function(){
   "use strict";
 
-  // ---------- third-octave band plan (IEC 61260 centres 20 Hz .. 20 kHz) ----------
   const CENTERS = [];
   for (let k = -17; k <= 13; k++) CENTERS.push(1000 * Math.pow(2, k/3));
   const EDGES = CENTERS.map(c => [c/Math.pow(2,1/6), c*Math.pow(2,1/6)]);
   const NB = CENTERS.length;
 
-  // A and C weighting curves in dB, evaluated per band centre
   function aWeight(f){
     const f2=f*f;
     const num=12194*12194*f2*f2;
@@ -146,7 +145,6 @@
   }
   const A_W = CENTERS.map(aWeight), C_W = CENTERS.map(cWeight), Z_W = CENTERS.map(()=>0);
 
-  // ---------- state ----------
   const S = {
     ctx:null, analyser:null, stream:null, buf:null, running:false, locked:false,
     weighting:"A", response:"fast", offset:100, hold:false,
@@ -156,10 +154,9 @@
   const $ = id => document.getElementById(id);
   const dbToPow = d => Math.pow(10, d/10);
 
-  // ---------- metres ----------
   const scope=$("scope"), g=scope.getContext("2d");
-  const dB_MIN=25, dB_MAX=110;         // display window in estimated dB SPL
-  const PAD={l:38,r:10,t:12,b:20};
+  const dB_MIN=25, dB_MAX=110;
+  const PAD={l:36,r:8,t:8,b:18};
 
   function sizeScope(){
     const r=scope.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2.5);
@@ -185,64 +182,58 @@
 
   function draw(){
     if(!S.w) sizeScope();
-    g.clearRect(0,0,S.h?S.w:0,S.h);
-    g.fillStyle="#0a0a0b"; g.fillRect(0,0,S.w,S.h);
+    g.clearRect(0,0,S.w,S.h);
 
-    // horizontal grid + labels
-    g.font="10px -apple-system,Helvetica,Arial";
+    // subtle grid
+    g.font="9px -apple-system,Helvetica,Arial";
     g.textAlign="right"; g.textBaseline="middle";
     for(let db=30; db<=110; db+=10){
       const y=yFor(db);
-      g.strokeStyle= db%30===0 ? "#2a2a30" : "#1c1c20";
+      g.strokeStyle= db%30===0 ? "#1c1c22" : "#141418";
+      g.lineWidth=1;
       g.beginPath(); g.moveTo(PAD.l,y); g.lineTo(S.w-PAD.r,y); g.stroke();
-      g.fillStyle="#6d6d76"; g.fillText(db, PAD.l-7, y);
+      g.fillStyle="#5a5a64"; g.fillText(db, PAD.l-6, y);
     }
 
     // bars
     const inner=S.w-PAD.l-PAD.r;
-    const bw=Math.max(2, inner/NB-1.6);
+    const bw=Math.max(1.8, inner/NB-1.4);
     for(let i=0;i<NB;i++){
       const db=S.db[i];
       const x=xFor(i);
       if(db>-200){
         const y=Math.max(yFor(db),PAD.t), y0=S.h-PAD.b;
         const grad = g.createLinearGradient(0,y,0,y0);
-        grad.addColorStop(0,"#38e07b"); grad.addColorStop(1,"#12653a");
+        grad.addColorStop(0,"#3ee0a0");
+        grad.addColorStop(0.6,"#22c55e");
+        grad.addColorStop(1,"#0f4c2a");
         g.fillStyle=grad;
         g.fillRect(x-bw/2, y, bw, Math.max(1,y0-y));
       }
-      // peak hold cap
+      // peak hold
       if(S.peaks[i]>-200){
         const py=yFor(S.peaks[i]);
-        g.fillStyle="#e8e8ec";
-        g.fillRect(x-bw/2, py, bw, 2);
+        g.fillStyle="#ff9a2e";
+        g.fillRect(x-bw/2, py-0.5, bw, 1.5);
       }
     }
 
-    // band labels
-    g.fillStyle="#6d6d76";
+    // labels
+    g.fillStyle="#5a5a64";
     g.textAlign="center"; g.textBaseline="top";
     for(const f of GRID){
       let bi=0, best=1e9;
       for(let i=0;i<NB;i++){ const d=Math.abs(CENTERS[i]-f); if(d<best){best=d;bi=i;} }
-      g.fillText(lbl(f), xFor(bi), S.h-PAD.b+5);
+      g.fillText(lbl(f), xFor(bi), S.h-PAD.b+4);
     }
   }
 
-  // ---------- DSP ----------
   function analyse(){
     const a=S.analyser;
     a.getFloatFrequencyData(S.buf);
     const sr=S.ctx.sampleRate, binHz=sr/a.fftSize;
     const half=a.frequencyBinCount;
 
-    // per third-octave band power: TOTAL energy in the band, not a per-bin average.
-    // Averaging would tilt the display downward with frequency, because wider
-    // high bands contain more bins than narrow low bands.
-    // Bin k covers (k-0.5 .. k+0.5)*binHz. A bin that straddles a band edge is
-    // split between the two bands in proportion to the overlap, so no energy is
-    // counted twice or dropped, and a band narrower than one bin (the lowest
-    // bands, or any band at high sample rates) still gets its share.
     const bandPow=new Float64Array(NB);
     for(let i=0;i<NB;i++){
       const a=EDGES[i][0]/binHz, b=EDGES[i][1]/binHz;
@@ -255,7 +246,6 @@
       bandPow[i]=sum;
     }
 
-    // display smoothing: fast ~125 ms, slow ~1 s
     const tau = S.response==="fast" ? 0.125 : 1.0;
     const dt = S.lastT ? Math.min(0.25,(performance.now()-S.lastT)/1000) : 0.05;
     const alpha = 1-Math.exp(-dt/tau);
@@ -263,38 +253,29 @@
     const W = S.weighting==="A"?A_W:(S.weighting==="C"?C_W:Z_W);
     let totalPow=0;
     for(let i=0;i<NB;i++){
-      // bars get the same power-domain Fast/Slow averaging as the SPL readout
       S.pw[i] = S.pw[i]===0 ? bandPow[i] : S.pw[i]+(bandPow[i]-S.pw[i])*alpha;
       S.db[i] = S.pw[i]>0 ? 10*Math.log10(S.pw[i])+S.offset : -200;
-      // weighted SPL contribution
-      totalPow += bandPow[i]*dbToPow(W[i]);   // dbToPow already divides by 10
+      totalPow += bandPow[i]*dbToPow(W[i]);
     }
 
-    // Fast/Slow time weighting averages sound power, not decibels. Averaging the
-    // dB values would under-read anything that is not steady.
     S.splPow = S.splPow===0 ? totalPow : S.splPow+(totalPow-S.splPow)*alpha;
     S.spl = S.splPow>0 ? 10*Math.log10(S.splPow)+S.offset : 0;
-    if(S.spl>S.maxSpl) S.maxSpl=S.spl;   // Max = highest time-weighted level
+    if(S.spl>S.maxSpl) S.maxSpl=S.spl;
 
-    // Leq over the session: time-weighted mean of the unsmoothed power, so it is
-    // independent of the Fast/Slow setting and of the frame rate.
     S.leqSum += totalPow*dt; S.leqT += dt;
     S.lastT=performance.now();
 
-    // peak hold with slow decay
     if(!S.hold){
-      const decay=dt*6; // dB per second
+      const decay=dt*5;
       for(let i=0;i<NB;i++){
         if(S.db[i]>S.peaks[i]) S.peaks[i]=S.db[i];
         else S.peaks[i]=Math.max(-200,S.peaks[i]-decay);
       }
     }
 
-    // loudest band
     let bi=0; for(let i=1;i<NB;i++) if(S.db[i]>S.db[bi]) bi=i;
     const loudestF=CENTERS[bi];
 
-    // paint text
     $("spl").textContent = S.spl? S.spl.toFixed(1) : "--.-";
     $("maxspl").textContent = S.maxSpl? S.maxSpl.toFixed(1) : "--.-";
     const leq = S.leqSum>0 ? 10*Math.log10(S.leqSum/S.leqT)+S.offset : 0;
@@ -317,8 +298,6 @@
     S.raf=requestAnimationFrame(loop);
   }
 
-  // ---------- startup ----------
-  // ---- microphone access, with visible diagnostics ----------------------
   function env(){
     return {
       secure: location.protocol==="https:" || window.isSecureContext===true,
@@ -343,7 +322,6 @@
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
       try{ return await navigator.mediaDevices.getUserMedia(opts); }
       catch(err){
-        // some browsers reject unknown constraints instead of ignoring them
         if(err && /Overconstrained|TypeError|NotSupported/i.test(err.name||"")){
           return await navigator.mediaDevices.getUserMedia({audio:true});
         }
@@ -386,7 +364,6 @@
       sizeScope(); loop();
       showDiag("mic: "+(track.label||"default"), "audio "+(S.ctx.sampleRate||"?")+" Hz, "+S.ctx.state);
 
-      // watchdog: if the microphone is silent, say so instead of showing nothing
       setTimeout(()=>{
         if(!S.running) return;
         let peak=-999; for(let i=0;i<NB;i++) if(S.db[i]>peak) peak=S.db[i];
@@ -412,7 +389,6 @@
 
   $("goBtn").addEventListener("click",start);
 
-  // controls
   document.querySelectorAll("#weightSeg button").forEach(b=>b.addEventListener("click",()=>{
     document.querySelectorAll("#weightSeg button").forEach(x=>x.classList.remove("on"));
     b.classList.add("on"); S.weighting=b.dataset.w;
@@ -446,14 +422,12 @@
   sizeScope();
   draw();
 
-  // resume audio if iOS suspends it when the tab is backgrounded
   const resume=()=>{ if(S.ctx && S.ctx.state==="suspended") S.ctx.resume().catch(()=>{}); };
   document.addEventListener("touchstart",resume,{passive:true});
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden) resume(); });
 
   showDiag("ready");
 
-  // debug hook: lets a test harness drive analyse() with a synthetic spectrum
   window.__pocketRTA = { S, analyse, draw, start, CENTERS, A_W, C_W };
 })();
 </script>

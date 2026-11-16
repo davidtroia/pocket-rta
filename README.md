@@ -2,8 +2,6 @@
 
 A working, mobile-first prototype of Pocket RTA, a measurement app for sound engineers, plus store-ready artwork.
 
-Live: https://davidtroia.github.io/pocket-rta/
-
 ## Open the prototype
 
 Microphone access only works over `http://localhost` or HTTPS, so serve the folder rather than opening the file directly:
@@ -112,4 +110,4 @@ npm test
 
 `npm test` runs the real app in Chromium and plays generated WAV files through Chromium's fake microphone, then checks the meter state: absolute level and A/C/Z weighting (a −26 dBFS 1 kHz tone must read 94 dB), Leq as an energy average, Fast time weighting on a 100 ms burst, and 1/3-octave band levels for a tone and for flat noise (including the lowest bands). Fixtures are generated at test time.
 
-CI runs the tests on every pull request. On `main`, passing tests publish the app (not the store artwork or tooling) to GitHub Pages; Settings → Pages → Source must be "GitHub Actions".
+CI runs the tests on every pull request and on `main`. There is no web deployment: the app ships as the iOS app.

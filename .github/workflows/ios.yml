@@ -1,0 +1,30 @@
+name: iOS build
+
+# Compiles the iOS app for the simulator without signing, so Swift or project errors show up on every change.
+on:
+  pull_request:
+    paths: ['ios/**', 'js/**', 'css/**', 'index.html', 'capacitor.config.json', 'package.json', 'tools/build-web.js', '.github/workflows/ios.yml']
+  push:
+    branches: [main]
+    paths: ['ios/**', 'js/**', 'css/**', 'index.html', 'capacitor.config.json', 'package.json', 'tools/build-web.js', '.github/workflows/ios.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:web
+      - run: npx cap sync ios
+      - name: Build for the iOS Simulator (no signing)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build

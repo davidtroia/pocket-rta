@@ -2,9 +2,13 @@
   "name": "pocket-rta",
   "private": true,
   "scripts": {
-    "test": "node test/pro.test.js && node test/geq.test.js && node test/dsp.test.js"
+    "test": "node test/pro.test.js && node test/geq.test.js && node test/dsp.test.js",
+    "build:web": "node tools/build-web.js"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
     "playwright": "1.63.0"
   }
 }

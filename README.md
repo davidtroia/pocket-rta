@@ -113,3 +113,12 @@ npm test
 `npm test` runs the real app in Chromium and plays generated WAV files through Chromium's fake microphone, then checks the meter state: absolute level and A/C/Z weighting (a −26 dBFS 1 kHz tone must read 94 dB), Leq as an energy average, Fast time weighting on a 100 ms burst, and 1/3-octave band levels for a tone and for flat noise (including the lowest bands). Fixtures are generated at test time.
 
 CI runs the tests on every pull request and on `main`. There is no web deployment: the app ships as the iOS app.
+
+## iOS app
+
+The app ships as an iOS app built with Capacitor (`capacitor.config.json`, `ios/`). The web files are packed into the app by `npm run build:web` (copies only what the app loads into `www/`) and `npx cap sync ios`.
+
+- **Bundle ID:** `com.balancedigitalllc.pocketrta`. iPhone only, portrait, dark.
+- **Native pieces** (`ios/App/App/`): `ProPlugin.swift` (the one-time Pro purchase, StoreKit 2; product ID `com.balancedigitalllc.pocketrta.pro`, a non-consumable to create in App Store Connect), `AudioSessionPlugin.swift` (measurement mode and loudspeaker output while the microphone is on), `MainViewController.swift` (registers them). `js/native-bridge.js` exposes them to the web app as `window.PocketRTANative`.
+- **CI** (`.github/workflows/ios.yml`) compiles the app for the simulator on every change, unsigned. It proves the project builds, not that purchases or audio work: that needs a real iPhone and an Apple Developer account.
+- **Build on a Mac:** `npm ci && npm run build:web && npx cap sync ios`, open `ios/App/App.xcodeproj`, pick your team under Signing & Capabilities, and run.

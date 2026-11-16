@@ -97,6 +97,18 @@ const BUY_OK = `localStorage.setItem('stubPro','1'); return true;`;
   p = await open(STUB(`return false;`, 'return false;'), base + '&pro=1&screen=gen');
   ok('URL parameters cannot grant Pro or open Pro screens', !(await p.evaluate(() => PocketRTA.isPro())) && await screen(p) === 'rta');
 
+  // 7. the iOS shim (js/native-bridge.js) turns Capacitor plugin calls into the bridge the app expects
+  const CAP = `window.__calls=[];window.Capacitor={isNativePlatform:()=>true,registerPlugin:n=>new Proxy({},{get:(t,m)=>async()=>{window.__calls.push(n+'.'+String(m));return m==='isPro'?{pro:false}:m==='buy'||m==='restore'?{pro:true}:m==='getProduct'?{price:'$1.99'}:{}}})};`;
+  p = await open(CAP);
+  ok('shim: bridge exists inside the native app', await p.evaluate(() => typeof window.PocketRTANative === 'object' && ['isPro', 'buyPro', 'restorePro', 'prepareAudio'].every(k => typeof PocketRTANative[k] === 'function')));
+  ok('shim: Pro features are locked in the native app', await screen(p) === 'rta' && !(await p.evaluate(() => PocketRTA.isPro())));
+  await p.click('[data-tab=gen]'); await p.click('#proSheetBuy'); await p.waitForTimeout(300);
+  ok('shim: purchase goes through the native plugin and unlocks', await p.evaluate(() => PocketRTA.isPro()) && (await p.evaluate(() => window.__calls)).includes('Pro.buy'));
+  ok('shim: the app checks the store at launch', (await p.evaluate(() => window.__calls)).includes('Pro.isPro'));
+  ok('shim: no page errors', p.errs.length === 0, p.errs.join('|'));
+  p = await open(null);
+  ok('shim: does nothing in a browser', await p.evaluate(() => window.PocketRTANative === undefined));
+
   await b.close(); server.close();
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

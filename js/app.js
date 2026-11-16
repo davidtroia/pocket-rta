@@ -386,7 +386,7 @@
     return { g, W: r.width, H: r.height };
   }
   const C = { teal: '#1A8FC0', tealHi: '#2BB3E8', steel: '#6F86B8', lav: '#A98BD0', lavHi: '#C3AEEA', amber: '#FFB020', red: '#FF4D4F', green: '#3DDC84', grid: '#141C27', grid2: '#1C2635', label: '#66758A' };
-  const MONO = '"JetBrains Mono", ui-monospace, Menlo, monospace';
+  const MONO = '"Geist Mono", ui-monospace, Menlo, monospace';
   const AXIS_F = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
   const AXIS_LBL = ['31', '63', '125', '250', '500', '1k', '2k', '4k', '8k', '16k'];
 
@@ -436,18 +436,18 @@
       gr.addColorStop(0, '#0B3550'); gr.addColorStop(0.45, '#1A8FC0'); gr.addColorStop(0.74, '#3FC1EE'); gr.addColorStop(0.87, C.amber); gr.addColorStop(1, C.red);
       cv._grad = gr; cv._gradKey = H + ':' + top;
     }
-    const bands = BANDS[S.res], gap = S.res >= 12 ? 1 : S.res >= 6 ? 1.5 : 2.5;
+    const bands = BANDS[S.res], gap = S.res >= 12 ? 1 : S.res >= 6 ? 1.5 : 2, dpr = DPR(), sn = v => Math.round(v * dpr) / dpr;   // snap to device pixels so edges stay crisp
     g.fillStyle = cv._grad;
     for (let b = 0; b < bands.length; b++) {
       const lv = R.disp[b]; if (lv <= bot) continue;
-      const x0 = x(bands[b].lo) + gap / 2, x1 = x(bands[b].hi) - gap / 2, yy = y(lv);
+      const x0 = sn(x(bands[b].lo) + gap / 2), x1 = sn(x(bands[b].hi) - gap / 2), yy = sn(y(lv));
       g.fillRect(x0, yy, x1 - x0, Tm + ph - yy);
     }
-    g.fillStyle = 'rgba(255,255,255,.16)';
-    for (let b = 0; b < bands.length; b++) { const lv = R.disp[b]; if (lv <= bot) continue; const x0 = x(bands[b].lo) + gap / 2, x1 = x(bands[b].hi) - gap / 2; g.fillRect(x0, y(lv), x1 - x0, 1); }
-    // peak hold
+    g.fillStyle = 'rgba(255,255,255,.5)';
+    for (let b = 0; b < bands.length; b++) { const lv = R.disp[b]; if (lv <= bot) continue; const x0 = sn(x(bands[b].lo) + gap / 2), x1 = sn(x(bands[b].hi) - gap / 2); g.fillRect(x0, sn(y(lv)), x1 - x0, 1 / dpr); }
+    // peak hold: one device-pixel-thin cap
     g.fillStyle = C.amber;
-    for (let b = 0; b < bands.length; b++) { const pk = R.peak[b]; if (pk <= bot) continue; const x0 = x(bands[b].lo) + gap / 2, x1 = x(bands[b].hi) - gap / 2; g.fillRect(x0, y(pk) - 1, x1 - x0, 2); }
+    for (let b = 0; b < bands.length; b++) { const pk = R.peak[b]; if (pk <= bot) continue; const x0 = sn(x(bands[b].lo) + gap / 2), x1 = sn(x(bands[b].hi) - gap / 2); g.fillRect(x0, sn(y(pk)) - 1, x1 - x0, 2 / dpr * 1.5); }
     // smoothed curve: fractional-octave smoothing of the fine data, scaled to the displayed bandwidth
     if (S.showLine) {
       const per = 24 / S.res, half = Math.max(2, per / 2), cal = dbToP(S.calOffset);
@@ -462,8 +462,7 @@
       }
       g.lineTo(px, py);
       g.lineJoin = 'round'; g.lineCap = 'round';
-      g.strokeStyle = 'rgba(169,139,208,.35)'; g.lineWidth = 5; g.stroke();
-      g.strokeStyle = '#E6DCFF'; g.lineWidth = 1.8; g.stroke();
+      g.strokeStyle = '#E6DCFF'; g.lineWidth = 1.25; g.stroke();
     }
     // cursor
     const cur = CURSOR.rta;
@@ -475,7 +474,7 @@
       const txt = `${fmtHzU(S.res <= 3 ? bd.nominal : bd.fc)}  ${R.disp[b].toFixed(1)} dB`;
       g.font = `600 11px ${MONO}`; const tw = g.measureText(txt).width + 16;
       const bx = clamp(cx - tw / 2, Lm + 2, Lm + pw - tw - 2);
-      g.fillStyle = 'rgba(18,26,37,.95)'; roundRect(g, bx, Tm + 6, tw, 22, 6); g.fill(); g.strokeStyle = '#2B3A50'; g.stroke();
+      g.fillStyle = 'rgba(18,26,37,.95)'; roundRect(g, bx, Tm + 6, tw, 22, 2); g.fill(); g.strokeStyle = '#2B3A50'; g.stroke();
       g.fillStyle = '#E8EEF6'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(txt, bx + 8, Tm + 17);
     }
     if (R.frozen) badge(g, Lm + pw - 8, Tm + 8, 'FROZEN', C.tealHi);
@@ -484,7 +483,7 @@
   function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function badge(g, xr, yt, txt, col) {
     g.font = `700 10px ${MONO}`; const w = g.measureText(txt).width + 14;
-    g.fillStyle = 'rgba(7,10,14,.85)'; roundRect(g, xr - w, yt, w, 20, 5); g.fill(); g.strokeStyle = col; g.lineWidth = 1; g.stroke();
+    g.fillStyle = 'rgba(7,10,14,.85)'; roundRect(g, xr - w, yt, w, 20, 2); g.fill(); g.strokeStyle = col; g.lineWidth = 1; g.stroke();
     g.fillStyle = col; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, xr - w / 2, yt + 10.5);
   }
 
@@ -532,14 +531,14 @@
     // colour bar
     const cbx = W - Rm + 6, grd = g.createLinearGradient(0, Tm + ph, 0, Tm);
     for (let i = 0; i <= 8; i++) { const c = Math.round(i / 8 * 255); grd.addColorStop(i / 8, `rgb(${LUT[c * 3]},${LUT[c * 3 + 1]},${LUT[c * 3 + 2]})`); }
-    g.fillStyle = grd; roundRect(g, cbx, Tm, 8, ph, 3); g.fill();
+    g.fillStyle = grd; roundRect(g, cbx, Tm, 8, ph, 0); g.fill();
     const cur = CURSOR.spectro;
     if (cur && cur.x >= Lm && cur.x <= Lm + pw && cur.y >= Tm && cur.y <= Tm + ph) {
       const f = F_MIN * 2 ** ((cur.x - Lm) / pw * LOG_SPAN), t = (cur.y - Tm) / ph * span;
       g.strokeStyle = 'rgba(232,238,246,.6)'; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(cur.x, Tm); g.lineTo(cur.x, Tm + ph); g.moveTo(Lm, cur.y); g.lineTo(Lm + pw, cur.y); g.stroke(); g.setLineDash([]);
       const txt = `${fmtHzU(f)}  −${t.toFixed(1)} s`; g.font = `600 11px ${MONO}`; const tw = g.measureText(txt).width + 16;
       const bx = clamp(cur.x + 8, Lm + 2, Lm + pw - tw - 2), by = clamp(cur.y - 30, Tm + 4, Tm + ph - 26);
-      g.fillStyle = 'rgba(18,26,37,.95)'; roundRect(g, bx, by, tw, 22, 6); g.fill(); g.fillStyle = '#E8EEF6'; g.textAlign = 'left'; g.fillText(txt, bx + 8, by + 11);
+      g.fillStyle = 'rgba(18,26,37,.95)'; roundRect(g, bx, by, tw, 22, 2); g.fill(); g.fillStyle = '#E8EEF6'; g.textAlign = 'left'; g.fillText(txt, bx + 8, by + 11);
     }
     if (R.specPaused) badge(g, Lm + pw - 8, Tm + 8, 'PAUSED', C.lavHi);
   }

@@ -60,7 +60,7 @@ previews/                            headless verification captures of every scr
 tools/                               scripts that rebuild every asset (see below)
 ```
 
-Palette: teal `#1A8FC0` / `#2BB3E8`, steel blue `#6F86B8` and lavender `#A98BD0` / `#C3AEEA` come from the Balance Digital logos. Green `#3DDC84`, amber `#FFB020` and red `#FF4D4F` are used for metering. Fonts are Inter (UI), JetBrains Mono (readouts) and Montserrat (wordmark), all SIL OFL (licences in `fonts/`).
+Palette: teal `#1A8FC0` / `#2BB3E8`, steel blue `#6F86B8` and lavender `#A98BD0` / `#C3AEEA` come from the Balance Digital logos. Green `#3DDC84`, amber `#FFB020` and red `#FF4D4F` are used for metering. Fonts are Geist (UI and readouts), Geist Mono (labels) and Montserrat (wordmark), all SIL OFL (licences in `fonts/`; Inter stays only for the store-artwork templates).
 
 ## Rebuilding the assets
 

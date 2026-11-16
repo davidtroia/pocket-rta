@@ -1,11 +1,12 @@
 /* Pocket RTA — Balance Digital LLC */
-@font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(../fonts/inter-latin-400-normal.woff2) format("woff2")}
-@font-face{font-family:Inter;font-weight:500;font-display:swap;src:url(../fonts/inter-latin-500-normal.woff2) format("woff2")}
-@font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(../fonts/inter-latin-600-normal.woff2) format("woff2")}
-@font-face{font-family:Inter;font-weight:700;font-display:swap;src:url(../fonts/inter-latin-700-normal.woff2) format("woff2")}
-@font-face{font-family:"JetBrains Mono";font-weight:400;font-display:swap;src:url(../fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2")}
-@font-face{font-family:"JetBrains Mono";font-weight:500;font-display:swap;src:url(../fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2")}
-@font-face{font-family:"JetBrains Mono";font-weight:700;font-display:swap;src:url(../fonts/jetbrains-mono-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:Geist;font-weight:300;font-display:swap;src:url(../fonts/geist-sans-latin-300-normal.woff2) format("woff2")}
+@font-face{font-family:Geist;font-weight:400;font-display:swap;src:url(../fonts/geist-sans-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Geist;font-weight:500;font-display:swap;src:url(../fonts/geist-sans-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:Geist;font-weight:600;font-display:swap;src:url(../fonts/geist-sans-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Geist Mono";font-weight:300;font-display:swap;src:url(../fonts/geist-mono-latin-300-normal.woff2) format("woff2")}
+@font-face{font-family:"Geist Mono";font-weight:400;font-display:swap;src:url(../fonts/geist-mono-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Geist Mono";font-weight:500;font-display:swap;src:url(../fonts/geist-mono-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Geist Mono";font-weight:600;font-display:swap;src:url(../fonts/geist-mono-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:Montserrat;font-weight:600;font-display:swap;src:url(../fonts/montserrat-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:Montserrat;font-weight:700;font-display:swap;src:url(../fonts/montserrat-latin-700-normal.woff2) format("woff2")}
 
@@ -14,8 +15,8 @@
   --text:#E8EEF6; --dim:#97A4B6; --mute:#5E6C7E;
   --teal:#1A8FC0; --teal-hi:#2BB3E8; --steel:#6F86B8; --lav:#A98BD0; --lav-hi:#C3AEEA;
   --green:#3DDC84; --amber:#FFB020; --red:#FF4D4F;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --ui:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ui:Geist,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --r:14px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -192,3 +193,67 @@ body.framed .tabbar,body.status .tabbar{height:82px;padding-bottom:18px}
 .toast.on{opacity:1;transform:none}
 .gen-spec{flex:1;min-height:96px;display:flex;flex-direction:column;padding:10px 12px 8px;gap:6px}
 .gen-spec .plot{border:0;border-radius:8px;min-height:60px}
+
+/* Pro unlock */
+[hidden]{display:none!important}
+.tabbar button{position:relative}
+.tabbar button.pro-lock::after{content:'PRO';position:absolute;top:3px;left:calc(50% + 6px);font:700 7px/1 var(--mono);letter-spacing:.08em;color:var(--lav-hi)}
+.seg button.pro-lock{color:var(--mute)}
+.seg button.pro-lock::after{content:'';display:inline-block;width:5px;height:5px;margin-left:4px;border-radius:50%;background:var(--lav-hi);vertical-align:middle}
+.sheet{position:absolute;inset:0;z-index:50;display:flex;align-items:flex-end;background:rgba(3,6,10,.64)}
+.sheet-card{width:100%;display:flex;flex-direction:column;gap:10px;padding:18px 18px calc(16px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line2);border-radius:18px 18px 0 0}
+.sheet-pill{align-self:flex-start;padding:3px 8px;border-radius:99px;border:1px solid var(--line2);font:700 10px/1 var(--mono);letter-spacing:.12em;color:var(--lav-hi)}
+.sheet-card h2{margin:0;font-family:Montserrat,var(--ui);font-weight:600;font-size:20px}
+.sheet-list{margin:0;padding-left:18px;color:var(--dim);font-size:14px;line-height:1.55}
+.sheet-price{margin:2px 0 4px;color:var(--dim);font-size:13px}
+.sheet-price b{color:var(--text);font-weight:600}
+.sheet-close{align-self:center;padding:8px 14px;background:none;border:0;color:var(--mute);font-size:13px}
+.sheet-card .btn{flex:none;height:46px;font-size:15px}
+
+/* ---------- Sharp instrument theme: square corners, hairlines, flat fills, no glow ---------- */
+:root{--r:3px;--bg0:#030507;--bg1:#06090D;--panel:#0A0F15;--panel2:#0F1620;--line:#17202C;--line2:#26323F}
+body{letter-spacing:-.006em;font-feature-settings:"tnum" 1,"ss01" 0}
+.plot,.card,.group,.ro,.stat,.seg,.btn,.chip,.seg button,.seg-tiles button,.stepper button,.row select,.inmeter,.outmeter,.meterbar-track,.src-chip,.toast,.tag,.gen-spec .plot{border-radius:var(--r)}
+.seg button{border-radius:2px}
+.meterbar-fill{border-radius:0}
+.sweep-track,.sweep-pos{border-radius:1px}
+.play{border-radius:var(--r);box-shadow:none;background:#1A7FAD;border-color:#2BB3E8}
+.play.on{background:#2A1419;box-shadow:none}
+.play.on .play-ico{border-radius:1px}
+.btn.accent{background:#176E99;border-color:#2BB3E8}
+.seg button.on{background:#14587B;box-shadow:inset 0 0 0 1px #2BB3E8}
+.seg-tiles button.on{background:#0E2536;box-shadow:inset 0 0 0 1px #2BB3E8;border-color:#2BB3E8}
+.spl-main{background:var(--panel)}
+.tag{background:#2BB3E8;color:#04080C}
+.src-dot{box-shadow:none;border-radius:0;width:6px;height:6px}
+.about{background:var(--panel)}
+.about-icon{border-radius:14px;box-shadow:none}
+.brand-name{font-weight:600;letter-spacing:.01em}
+.tabbar{background:#04070A}
+.tabbar button{font-weight:500;letter-spacing:.04em;text-transform:uppercase;font-size:9.5px}
+.tabbar button.on svg{filter:none}
+.tabbar button.on::before{content:'';position:absolute;top:-1px;left:22%;right:22%;height:2px;background:var(--teal-hi)}
+.tabbar svg{stroke-width:1.4}
+.btn svg{stroke-width:1.4}
+.seg-tiles svg{stroke-width:1.5}
+.ro-k,.ctl-k,.set-h{font-weight:500;letter-spacing:.14em}
+.ro-v b{font-weight:500}
+.stat b{font-weight:500}
+.stat-k{font-weight:500}
+.spl-read b{font-weight:300;font-size:92px;letter-spacing:-.06em}
+.spl-read span{font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.gen-big{font-weight:400}
+.stepper b{font-weight:500}
+input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:0;background:linear-gradient(90deg,var(--teal-hi) 0,var(--teal-hi) var(--p,50%),#26323F var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{width:14px;height:22px;border-radius:2px;margin-top:-10px;background:#EAF2FA;border:0;box-shadow:none}
+input[type=range]::-moz-range-track{height:2px;border-radius:0;background:#26323F}
+input[type=range]::-moz-range-progress{height:2px;border-radius:0;background:var(--teal-hi)}
+input[type=range]::-moz-range-thumb{width:14px;height:22px;border-radius:2px;background:#EAF2FA;border:0}
+.sheet-card{border-radius:6px 6px 0 0}
+.sheet-pill{border-radius:2px}
+/* big numerals: proportional light Geist with tabular figures (no slashed zero, tight decimal point) */
+.spl-read b,.stat b,.ro-v b,.gen-big{font-family:var(--ui);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.spl-read b{font-size:96px;letter-spacing:-.03em}
+.stat b{font-size:23px;letter-spacing:-.02em}
+.ro-v b{font-size:18px;letter-spacing:-.01em}
+.gen-big{font-size:23px;letter-spacing:-.01em}

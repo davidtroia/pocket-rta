@@ -2,8 +2,6 @@
 
 A working, mobile-first prototype of Pocket RTA, a measurement app for sound engineers, plus store-ready artwork.
 
-Live: https://davidtroia.github.io/pocket-rta/
-
 ## Open the prototype
 
 Microphone access only works over `http://localhost` or HTTPS, so serve the folder rather than opening the file directly:
@@ -60,7 +58,7 @@ previews/                            headless verification captures of every scr
 tools/                               scripts that rebuild every asset (see below)
 ```
 
-Palette: teal `#1A8FC0` / `#2BB3E8`, steel blue `#6F86B8` and lavender `#A98BD0` / `#C3AEEA` come from the Balance Digital logos. Green `#3DDC84`, amber `#FFB020` and red `#FF4D4F` are used for metering. Fonts are Inter (UI), JetBrains Mono (readouts) and Montserrat (wordmark), all SIL OFL (licences in `fonts/`).
+Palette: teal `#1A8FC0` / `#2BB3E8`, steel blue `#6F86B8` and lavender `#A98BD0` / `#C3AEEA` come from the Balance Digital logos. Green `#3DDC84`, amber `#FFB020` and red `#FF4D4F` are used for metering. Fonts are Geist (UI and readouts), Geist Mono (labels) and Montserrat (wordmark), all SIL OFL (licences in `fonts/`; Inter stays only for the store-artwork templates).
 
 ## Rebuilding the assets
 
@@ -85,6 +83,23 @@ node tools/verify.js             # headless test of every screen and control, wr
 
 © 2026 Balance Digital LLC · Mississippi, USA
 
+## Free and Pro
+
+Free: RTA (1/1 and 1/3 octave), SPL meter, calibration. **Pro**, a one-time $1.99 purchase: signal generator (sine oscillator 20 Hz to 20 kHz, pink and white noise, sweep), waterfall, and 1/6 and 1/12-octave analysis.
+
+The paywall only applies where purchases exist, so the browser build stays fully unlocked. The native app defines `window.PocketRTANative` before `js/app.js` loads:
+
+```js
+window.PocketRTANative = {
+  price: '$1.99',                 // optional, the store's localized price string
+  isPro:      async () => bool,   // checked at every launch; a refund locks Pro again
+  buyPro:     async () => bool,   // true once the purchase has completed
+  restorePro: async () => bool,   // true if a previous purchase was found
+};
+```
+
+Add `?gate=1` to the URL to preview the locked state in a browser.
+
 ## Tests and deployment
 
 ```bash
@@ -95,4 +110,4 @@ npm test
 
 `npm test` runs the real app in Chromium and plays generated WAV files through Chromium's fake microphone, then checks the meter state: absolute level and A/C/Z weighting (a −26 dBFS 1 kHz tone must read 94 dB), Leq as an energy average, Fast time weighting on a 100 ms burst, and 1/3-octave band levels for a tone and for flat noise (including the lowest bands). Fixtures are generated at test time.
 
-CI runs the tests on every pull request. On `main`, passing tests publish the app (not the store artwork or tooling) to GitHub Pages; Settings → Pages → Source must be "GitHub Actions".
+CI runs the tests on every pull request and on `main`. There is no web deployment: the app ships as the iOS app.

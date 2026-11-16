@@ -85,6 +85,23 @@ node tools/verify.js             # headless test of every screen and control, wr
 
 © 2026 Balance Digital LLC · Mississippi, USA
 
+## Free and Pro
+
+Free: RTA (1/1 and 1/3 octave), SPL meter, calibration. **Pro**, a one-time $1.99 purchase: signal generator (sine oscillator 20 Hz to 20 kHz, pink and white noise, sweep), waterfall, and 1/6 and 1/12-octave analysis.
+
+The paywall only applies where purchases exist, so the browser build stays fully unlocked. The native app defines `window.PocketRTANative` before `js/app.js` loads:
+
+```js
+window.PocketRTANative = {
+  price: '$1.99',                 // optional, the store's localized price string
+  isPro:      async () => bool,   // checked at every launch; a refund locks Pro again
+  buyPro:     async () => bool,   // true once the purchase has completed
+  restorePro: async () => bool,   // true if a previous purchase was found
+};
+```
+
+Add `?gate=1` to the URL to preview the locked state in a browser.
+
 ## Tests and deployment
 
 ```bash

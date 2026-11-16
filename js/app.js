@@ -16,7 +16,7 @@
   function gauss() { let u = 0; while (u === 0) u = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283185307179586 * rand()); }
 
   // ---------------- settings ----------------
-  const DEFAULTS = { res: 3, weight: 'Z', avg: 'fast', splW: 'A', splT: 'fast', calOffset: 120, calRef: 94, calDate: null,
+  const DEFAULTS = { res: 3, weight: 'Z', avg: 'fast', splW: 'A', splT: 'fast', calOffset: 120, calRef: 94, calDate: null, pro: false,
     rtaTop: 100, rtaRange: 60, showLine: true, specSpan: 10, specRange: 60, genType: 'pink', genFreq: 1000, genLevel: -18, sweepDur: 5, deviceId: '' };
   const KEY = 'pocketrta.v1';
   const S = Object.assign({}, DEFAULTS);
@@ -599,6 +599,7 @@
   // ---------------- UI ----------------
   let screen = Q.get('screen') || 'rta';
   function show(name) {
+    if (!isPro() && PRO_TABS.includes(name)) { openPro(() => show(name)); return; }
     if (!$(`.screen[data-screen="${name}"]`)) name = 'rta';
     screen = name;
     $$('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen === name));
@@ -610,6 +611,7 @@
     seg.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const raw = b.dataset.v, v = typeof DEFAULTS[key] === 'number' ? Number(raw) : raw;
+      if (key === 'res' && !isPro() && PRO_RES.includes(v)) { openPro(() => { S.res = v; save(); syncSegs(); onSetting('res', true); }); return; }
       const changed = S[key] !== v; S[key] = v; save(); syncSegs();
       onSetting(key, changed);
     });
@@ -627,6 +629,43 @@
     if (key === 'sweepDur' && A.genPlaying && S.genType === 'sweep') { buildGenSource(); }
     if (key === 'specRange' || key === 'rtaTop') clearSpec();
     if (key === 'calRef') uiCal();
+  }
+
+  // ---------------- Pro unlock ----------------
+  // Free: RTA (1/1 and 1/3 octave), SPL meter, calibration. Pro (one-time purchase): signal generator, waterfall, 1/6 and 1/12 octave.
+  // Locking applies only where purchases exist: inside the native app (which defines window.PocketRTANative before this script
+  // loads) or when forced with ?gate=1. A browser build cannot enforce a paywall, so it stays fully unlocked.
+  // Native bridge: { buyPro(): Promise<boolean>, restorePro(): Promise<boolean>, isPro(): Promise<boolean>, price?: string }
+  const NATIVE = window.PocketRTANative || null;
+  const GATED = !!NATIVE || Q.get('gate') === '1';
+  const PRO_TABS = ['spectro', 'gen'], PRO_RES = [6, 12];
+  const isPro = () => !GATED || S.pro === true;
+  let proAfter = null;
+  function uiPro() {
+    const pro = isPro(), price = (NATIVE && NATIVE.price) || '$1.99';
+    $$('.tabbar button').forEach(b => b.classList.toggle('pro-lock', !pro && PRO_TABS.includes(b.dataset.tab)));
+    $$('[data-key=res] button').forEach(b => b.classList.toggle('pro-lock', !pro && PRO_RES.includes(Number(b.dataset.v))));
+    $('#proGroup').hidden = !GATED; $('#proStatus').textContent = pro ? 'Pro unlocked' : 'Free';
+    $('#proBuyBtn').hidden = pro; $('#proBuyBtn').textContent = 'Unlock Pro · ' + price; $('#proPrice').textContent = price;
+  }
+  function setPro(v) {
+    S.pro = !!v; save();
+    if (!isPro()) {   // e.g. the store reports a refund while a Pro setting or screen is active
+      if (PRO_RES.includes(S.res)) { S.res = 3; save(); syncSegs(); onSetting('res', true); }
+      if (PRO_TABS.includes(screen)) { if (A.genPlaying) genStop(); show('rta'); }
+    }
+    uiPro();
+  }
+  function openPro(after) { proAfter = after || null; $('#proSheet').hidden = false; $('#proSheetBuy').focus(); }
+  function closePro() { $('#proSheet').hidden = true; proAfter = null; }
+  function proUnlocked() { const after = proAfter; setPro(true); closePro(); toast('Pro unlocked. Thank you!'); if (after) after(); }
+  async function buyPro() {
+    if (!NATIVE || !NATIVE.buyPro) { toast('Purchases are available in the iOS app.'); return; }
+    try { if (await NATIVE.buyPro()) proUnlocked(); } catch (e) { toast('The purchase did not complete.'); }
+  }
+  async function restorePro() {
+    if (!NATIVE || !NATIVE.restorePro) { toast('Purchases are available in the iOS app.'); return; }
+    try { if (await NATIVE.restorePro()) proUnlocked(); else toast('No previous purchase was found for this Apple ID.'); } catch (e) { toast('Could not reach the App Store. Try again.'); }
   }
 
   let toastT = 0;
@@ -807,15 +846,22 @@
     if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener('devicechange', listDevices);
 
     // screenshot / demo parameters
-    for (const k of Object.keys(DEFAULTS)) if (Q.has(k) && k !== 'calDate' && k !== 'deviceId') { const v = Q.get(k); S[k] = typeof DEFAULTS[k] === 'number' ? Number(v) : typeof DEFAULTS[k] === 'boolean' ? v === '1' : v; }
+    for (const k of Object.keys(DEFAULTS)) if (Q.has(k) && k !== 'calDate' && k !== 'deviceId' && k !== 'pro') { const v = Q.get(k); S[k] = typeof DEFAULTS[k] === 'number' ? Number(v) : typeof DEFAULTS[k] === 'boolean' ? v === '1' : v; }
+    if (!isPro() && PRO_RES.includes(S.res)) S.res = 3;
+    if (!isPro() && PRO_TABS.includes(screen)) screen = 'rta';
     syncSegs(); $('#lineBtn').setAttribute('aria-pressed', String(S.showLine));
-    setSource('sim'); uiGen(); uiCal(); show(screen);
+    setSource('sim'); uiGen(); uiCal(); uiPro(); show(screen);
+    $('#proSheetBuy').addEventListener('click', buyPro); $('#proBuyBtn').addEventListener('click', () => openPro(null));
+    $('#proSheetRestore').addEventListener('click', restorePro); $('#proRestoreBtn').addEventListener('click', restorePro);
+    $('#proSheetClose').addEventListener('click', closePro); $('#proSheet').addEventListener('click', e => { if (e.target.id === 'proSheet') closePro(); });
+    window.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#proSheet').hidden) closePro(); });
+    if (NATIVE && NATIVE.isPro) NATIVE.isPro().then(setPro).catch(() => {});
     const warm = Number(Q.get('prewarm') || 0);
-    if (Q.get('play') === '1') genStart();
+    if (Q.get('play') === '1' && isPro()) genStart();
     if (warm > 0) { for (let t = 0; t < warm; t += 1 / 60) process(1 / 60); if (Q.has('freeze')) $('#freezeBtn').click(); }
     if (Q.get('mic') === '1') enableMic();
     requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
   }
-  window.PocketRTA = { S, A, R, L, BANDS, show, enableMic, genStart, genStop, resetAll };
+  window.PocketRTA = { S, A, R, L, BANDS, isPro, show, enableMic, genStart, genStop, resetAll };
   init();
 })();

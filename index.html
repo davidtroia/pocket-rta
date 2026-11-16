@@ -166,6 +166,12 @@
         <!-- ================= SETTINGS ================= -->
         <section class="screen" data-screen="settings" aria-label="Calibration and settings">
           <div class="set-scroll">
+            <h3 class="set-h" id="proH">Pocket RTA Pro</h3>
+            <div class="group" id="proGroup" hidden>
+              <div class="row"><span>Status</span><b id="proStatus">Free</b></div>
+              <div class="row row-btn"><button class="btn wide accent" id="proBuyBtn" type="button">Unlock Pro</button><button class="btn wide" id="proRestoreBtn" type="button">Restore purchase</button></div>
+            </div>
+
             <h3 class="set-h">Input</h3>
             <div class="group">
               <div class="row"><span>Source</span><b id="setSource">Simulated signal</b></div>
@@ -218,6 +224,21 @@
         <button data-tab="settings"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg><span>Settings</span></button>
       </nav>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="sheet" id="proSheet" role="dialog" aria-modal="true" aria-labelledby="proTitle" hidden>
+        <div class="sheet-card">
+          <div class="sheet-pill">PRO</div>
+          <h2 id="proTitle">Unlock Pocket RTA Pro</h2>
+          <ul class="sheet-list">
+            <li>Signal generator: sine oscillator 20 Hz to 20 kHz, pink noise, white noise and sweep</li>
+            <li>Waterfall spectrogram</li>
+            <li>1/6 and 1/12-octave analysis</li>
+          </ul>
+          <p class="sheet-price">One-time purchase · <b id="proPrice">$1.99</b> · No subscription</p>
+          <button class="btn wide accent" id="proSheetBuy" type="button">Unlock Pro</button>
+          <button class="btn wide" id="proSheetRestore" type="button">Restore purchase</button>
+          <button class="sheet-close" id="proSheetClose" type="button">Not now</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="desk-note" id="deskNote">Pocket RTA 1.0 · Balance Digital LLC &nbsp;·&nbsp; Keys <kbd>1</kbd>–<kbd>5</kbd> screens, <kbd>F</kbd> freeze, <kbd>R</kbd> reset peaks, <kbd>M</kbd> microphone</div>

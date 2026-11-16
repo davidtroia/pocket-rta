@@ -192,3 +192,19 @@ body.framed .tabbar,body.status .tabbar{height:82px;padding-bottom:18px}
 .toast.on{opacity:1;transform:none}
 .gen-spec{flex:1;min-height:96px;display:flex;flex-direction:column;padding:10px 12px 8px;gap:6px}
 .gen-spec .plot{border:0;border-radius:8px;min-height:60px}
+
+/* Pro unlock */
+[hidden]{display:none!important}
+.tabbar button{position:relative}
+.tabbar button.pro-lock::after{content:'PRO';position:absolute;top:3px;left:calc(50% + 6px);font:700 7px/1 var(--mono);letter-spacing:.08em;color:var(--lav-hi)}
+.seg button.pro-lock{color:var(--mute)}
+.seg button.pro-lock::after{content:'';display:inline-block;width:5px;height:5px;margin-left:4px;border-radius:50%;background:var(--lav-hi);vertical-align:middle}
+.sheet{position:absolute;inset:0;z-index:50;display:flex;align-items:flex-end;background:rgba(3,6,10,.64)}
+.sheet-card{width:100%;display:flex;flex-direction:column;gap:10px;padding:18px 18px calc(16px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line2);border-radius:18px 18px 0 0}
+.sheet-pill{align-self:flex-start;padding:3px 8px;border-radius:99px;border:1px solid var(--line2);font:700 10px/1 var(--mono);letter-spacing:.12em;color:var(--lav-hi)}
+.sheet-card h2{margin:0;font-family:Montserrat,var(--ui);font-weight:600;font-size:20px}
+.sheet-list{margin:0;padding-left:18px;color:var(--dim);font-size:14px;line-height:1.55}
+.sheet-price{margin:2px 0 4px;color:var(--dim);font-size:13px}
+.sheet-price b{color:var(--text);font-weight:600}
+.sheet-close{align-self:center;padding:8px 14px;background:none;border:0;color:var(--mute);font-size:13px}
+.sheet-card .btn{flex:none;height:46px;font-size:15px}

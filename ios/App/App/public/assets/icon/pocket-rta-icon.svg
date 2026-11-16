@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="m-ring" x1="200" y1="200" x2="824" y2="824" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2BB3E8"/><stop offset=".55" stop-color="#6F86B8"/><stop offset="1" stop-color="#A98BD0"/></linearGradient>
+    <linearGradient id="m-bar" x1="0" y1="680" x2="0" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1A8FC0"/><stop offset=".6" stop-color="#6F86B8"/><stop offset="1" stop-color="#C3AEEA"/></linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1024" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#101A2B"/><stop offset="1" stop-color="#05080D"/></linearGradient>
+    <radialGradient id="glow" cx="512" cy="540" r="470" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1A8FC0" stop-opacity=".30"/><stop offset=".6" stop-color="#6F86B8" stop-opacity=".08"/><stop offset="1" stop-color="#6F86B8" stop-opacity="0"/></radialGradient>
+    
+  </defs>
+  <g>
+    <rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/>
+    <circle cx="512" cy="512" r="318" fill="none" stroke="url(#m-ring)" stroke-width="46"/><rect x="283" y="518" width="50" height="162" rx="10" fill="url(#m-bar)"/><rect x="283" y="484" width="50" height="12" rx="6" fill="#E8EEF6"/><rect x="351" y="434" width="50" height="246" rx="10" fill="url(#m-bar)"/><rect x="351" y="400" width="50" height="12" rx="6" fill="#E8EEF6"/><rect x="419" y="356" width="50" height="324" rx="10" fill="url(#m-bar)"/><rect x="419" y="322" width="50" height="12" rx="6" fill="#E8EEF6"/><rect x="487" y="408" width="50" height="272" rx="10" fill="url(#m-bar)"/><rect x="487" y="374" width="50" height="12" rx="6" fill="#E8EEF6"/><rect x="555" y="324" width="50" height="356" rx="10" fill="url(#m-bar)"/><rect x="555" y="290" width="50" height="12" rx="6" fill="#FFB020"/><rect x="623" y="397" width="50" height="283" rx="10" fill="url(#m-bar)"/><rect x="623" y="363" width="50" height="12" rx="6" fill="#E8EEF6"/><rect x="691" y="480" width="50" height="200" rx="10" fill="url(#m-bar)"/><rect x="691" y="446" width="50" height="12" rx="6" fill="#E8EEF6"/>
+  </g>
+</svg>

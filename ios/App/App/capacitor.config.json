@@ -1,0 +1,10 @@
+{
+	"appId": "com.balancedigitalllc.pocketrta",
+	"appName": "Pocket RTA",
+	"webDir": "www",
+	"ios": {
+		"contentInset": "never",
+		"backgroundColor": "#030507"
+	},
+	"packageClassList": []
+}

@@ -1,0 +1,3 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="330 260 400 300"><defs><linearGradient id="bm-o" x1="474" y1="451" x2="690" y2="371" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B5A82"/><stop offset=".35" stop-color="#137DAE"/><stop offset="1" stop-color="#1A9BD0"/></linearGradient>
+    <clipPath id="bm-low"><rect x="456" y="431" width="140" height="140"/></clipPath></defs><circle cx="582" cy="411" r="88" fill="none" stroke="url(#bm-o)" stroke-width="36"/><rect x="354" y="280" width="36" height="131" fill="#FFFFFF"/><circle cx="456" cy="411" r="84" fill="none" stroke="#FFFFFF" stroke-width="36"/><g clip-path="url(#bm-low)"><circle cx="582" cy="411" r="88" fill="none" stroke="url(#bm-o)" stroke-width="36"/></g></svg>

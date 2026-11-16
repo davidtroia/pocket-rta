@@ -47,11 +47,15 @@
             <div class="ro"><span class="ro-k">Peak band</span><span class="ro-v"><b id="rtaPeakF">--</b><i id="rtaPeakL">-- dB</i></span></div>
             <div class="ro"><span class="ro-k">Averaging</span><span class="ro-v"><b id="rtaAvgK">Fast</b><i id="rtaAvgT">τ 125 ms</i></span></div>
           </div>
+          <div class="geq" id="geqPanel" hidden>
+            <div class="geq-h"><span>Ring-out</span><em id="geqSetTxt">28-band GEQ</em></div>
+            <div class="geq-body" id="geqBody"></div>
+          </div>
           <div class="plot"><canvas id="rtaCanvas"></canvas></div>
           <div class="controls">
             <div class="ctl-row">
               <div class="ctl grow"><span class="ctl-k">Resolution</span>
-                <div class="seg" data-key="res"><button data-v="1">1/1</button><button data-v="3">1/3</button><button data-v="6">1/6</button><button data-v="12">1/12</button></div></div>
+                <div class="seg" data-key="res"><button data-v="1">1/1</button><button data-v="3">1/3</button><button data-v="6">1/6</button><button data-v="12">1/12</button><button data-v="0">GEQ</button></div></div>
             </div>
             <div class="ctl-row">
               <div class="ctl"><span class="ctl-k">Weighting</span>
@@ -197,6 +201,12 @@
               <p class="note">Fit the calibrator to the mic, switch it on, then tap Calibrate. Pocket RTA measures the Z-weighted level for 3 seconds and sets the offset so the reading matches the reference. The default offset assumes a typical phone mic (94 dB SPL ≈ −26 dBFS). Phone and browser inputs are not Class 1 or Class 2 instruments.</p>
             </div>
 
+            <h3 class="set-h">Console graphic EQ</h3>
+            <div class="group">
+              <div class="row"><span>GEQ bands</span><div class="seg compact" data-key="geqSet"><button data-v="28">28-band</button><button data-v="31">31-band</button></div></div>
+              <p class="note">Used by the GEQ view on the RTA screen. 28-band covers 31.5 Hz to 16 kHz (for example the Soundcraft Si Expression). 31-band covers 20 Hz to 20 kHz (for example the X32 and M32). Check your console's EQ screen for its band count and range.</p>
+            </div>
+
             <h3 class="set-h">Display</h3>
             <div class="group">
               <div class="row"><span>Scale top</span><div class="seg compact" data-key="rtaTop"><button data-v="80">80</button><button data-v="100">100</button><button data-v="120">120</button><button data-v="140">140</button></div></div>
@@ -232,6 +242,7 @@
             <li>Signal generator: sine oscillator 20 Hz to 20 kHz, pink noise, white noise and sweep</li>
             <li>Waterfall spectrogram</li>
             <li>1/6 and 1/12-octave analysis</li>
+            <li>GEQ Assist: finds ringing frequencies and shows which graphic EQ fader to pull down</li>
           </ul>
           <p class="sheet-price">One-time purchase · <b id="proPrice">$1.99</b> · No subscription</p>
           <button class="btn wide accent" id="proSheetBuy" type="button">Unlock Pro</button>

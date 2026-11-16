@@ -24,6 +24,7 @@ python3 -m http.server 8765
 | **SPL** | Large dB SPL readout, A/C/Z weighting, Fast/Slow. Leq, Max, Min, integration time and a 2-minute level history with an 85 dB line. |
 | **Waterfall** | Scrolling spectrogram at 1/24-octave resolution. 10/30/60 s history, 40/60/80 dB range, live dominant-frequency readout. |
 | **Generator** | Pink noise, white noise, sine (20 Hz–20 kHz, ±⅓-octave steps, presets) and a log sweep (1/5/10/20 s), all played through Web Audio. Level is set in dBFS RMS, with a live output meter and output spectrum. |
+| **GEQ view** (RTA screen, Pro) | A 1/3-octave view limited to the bands of your console's graphic EQ (28-band 31.5 Hz–16 kHz or 31-band 20 Hz–20 kHz, set in Settings). The ring-out helper flags a narrow peak that stays well above its surroundings for a second and says which fader to pull down and roughly how far (2 to 6 dB, a starting point). It listens only: you move the faders. Use it with the mics open and no music playing. |
 | **Settings** | Input source, device picker, sample rate, analyzer details. Mic calibration (manual offset, or 3-second auto-calibration against a 94/104/114 dB reference). Display scale. About screen. |
 
 Settings are saved in `localStorage`. Live input uses `getUserMedia` with AGC, echo cancellation and noise suppression turned off, feeding an 8192-point AnalyserNode for the RTA/waterfall and a 2048-point AnalyserNode for SPL (IEC 61672 A/C curves, exponential time weighting).
@@ -78,6 +79,7 @@ node tools/verify.js             # headless test of every screen and control, wr
 - Browsers and operating systems may still filter the input (for example a low-cut filter on some phones) even with processing turned off. Below ~40 Hz and above ~16 kHz, phone mics roll off.
 - The analyzer window is 171 ms at 48 kHz, so the lowest 1/12-octave bands are interpolated from FFT bins. SPL Fast/Slow are computed per animation frame from a 43 ms window. That is close to, but not the same as, a sample-accurate IEC meter.
 - The SPL meter weights each bin of a 2048-point FFT, which reads about +0.9 dB high for a pure tone near 63 Hz (IEC 61672 Class 2 allows ±1.5 dB there). Time-domain weighting filters would remove this.
+- GEQ Assist cannot separate 1/3-octave bands below about 40 Hz: at 25 Hz one band is roughly one FFT bin wide, so a ringing tone there may be placed on a neighbouring fader.
 - Generator noise levels are RMS and stop at −12 dBFS so 12 dB peaks never clip. Sine and sweep stop at −3 dBFS RMS (0 dBFS peak).
 - The simulated signal is labelled **SIM** everywhere it is in use and is never mixed with a live mic input.
 
@@ -85,7 +87,7 @@ node tools/verify.js             # headless test of every screen and control, wr
 
 ## Free and Pro
 
-Free: RTA (1/1 and 1/3 octave), SPL meter, calibration. **Pro**, a one-time $1.99 purchase: signal generator (sine oscillator 20 Hz to 20 kHz, pink and white noise, sweep), waterfall, and 1/6 and 1/12-octave analysis.
+Free: RTA (1/1 and 1/3 octave), SPL meter, calibration. **Pro**, a one-time $1.99 purchase: signal generator (sine oscillator 20 Hz to 20 kHz, pink and white noise, sweep), waterfall, 1/6 and 1/12-octave analysis, and GEQ Assist.
 
 The paywall only applies where purchases exist, so the browser build stays fully unlocked. The native app defines `window.PocketRTANative` before `js/app.js` loads:
 

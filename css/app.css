@@ -257,3 +257,11 @@ input[type=range]::-moz-range-thumb{width:14px;height:22px;border-radius:2px;bac
 .stat b{font-size:23px;letter-spacing:-.02em}
 .ro-v b{font-size:18px;letter-spacing:-.01em}
 .gen-big{font-size:23px;letter-spacing:-.01em}
+/* GEQ Assist */
+.geq{flex:none;padding:8px 12px 9px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.geq-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.geq-h span{font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.geq-h em{font:500 10px/1 var(--mono);font-style:normal;color:var(--steel)}
+.geq-body p{margin:0;font-size:12.5px;line-height:1.45;color:var(--dim)}
+.geq-row{display:flex;align-items:baseline;gap:10px;padding:2px 0;font-size:13px;color:var(--dim)}
+.geq-row b{min-width:66px;font:500 15px/1.2 var(--ui);font-variant-numeric:tabular-nums;color:var(--red)}

@@ -50,6 +50,7 @@ const BUY_OK = `localStorage.setItem('stubPro','1'); return true;`;
   await p.click('#proSheetClose'); ok('sheet closes', !(await sheet(p)));
   await p.click('[data-tab=spectro]'); ok('locked: waterfall tab blocked', await screen(p) === 'rta'); await p.keyboard.press('Escape');
   await p.click('[data-key=res] [data-v="6"]'); ok('locked: 1/6 octave blocked', await res(p) === 3 && await sheet(p)); await p.keyboard.press('Escape');
+  await p.click('[data-key=res] [data-v="0"]'); ok('locked: GEQ Assist blocked', await res(p) === 3 && await sheet(p)); await p.keyboard.press('Escape');
   await p.click('[data-key=res] [data-v="1"]'); ok('locked: free resolution 1/1 still works', await res(p) === 1);
   await p.keyboard.press('4'); ok('locked: keyboard shortcut cannot bypass', await screen(p) === 'rta');
   ok('locked: no page errors', p.errs.length === 0, p.errs.join('|'));
@@ -63,6 +64,7 @@ const BUY_OK = `localStorage.setItem('stubPro','1'); return true;`;
   ok('purchase: lands on the screen the user asked for', await screen(p) === 'gen');
   ok('purchase: sheet closed', !(await sheet(p)));
   await p.click('[data-tab=rta]'); await p.click('[data-key=res] [data-v="12"]'); ok('purchase: 1/12 octave works', await res(p) === 12);
+  await p.click('[data-key=res] [data-v="0"]'); await p.waitForTimeout(300); ok('purchase: GEQ Assist works', await res(p) === 0 && !(await p.evaluate(() => document.getElementById('geqPanel').hidden)));
   await p.reload(); await p.waitForTimeout(400);
   ok('purchase persists after reload', await p.evaluate(() => PocketRTA.isPro()));
   await p.click('[data-tab=spectro]'); ok('after reload: waterfall opens', await screen(p) === 'spectro');
@@ -89,8 +91,8 @@ const BUY_OK = `localStorage.setItem('stubPro','1'); return true;`;
   ok('store error: stays locked, no crash', !(await p.evaluate(() => PocketRTA.isPro())) && p.errs.length === 0, p.errs.join('|'));
 
   // 6. a saved Pro-only setting does not survive while locked; URL cannot grant Pro
-  p = await open(STUB(`return false;`, 'return false;'), base, `localStorage.setItem('pocketrta.v1', JSON.stringify({res:12,pro:true}));`);
-  ok('locked: saved 1/12 resolution is reset to 1/3', await res(p) === 3);
+  p = await open(STUB(`return false;`, 'return false;'), base, `localStorage.setItem('pocketrta.v1', JSON.stringify({res:0,pro:true}));`);
+  ok('locked: saved GEQ view is reset to 1/3', await res(p) === 3);
   ok('locked: cached pro flag alone does not unlock when the store says no', !(await p.evaluate(() => PocketRTA.isPro())));
   p = await open(STUB(`return false;`, 'return false;'), base + '&pro=1&screen=gen');
   ok('URL parameters cannot grant Pro or open Pro screens', !(await p.evaluate(() => PocketRTA.isPro())) && await screen(p) === 'rta');

@@ -16,7 +16,7 @@
   function gauss() { let u = 0; while (u === 0) u = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283185307179586 * rand()); }
 
   // ---------------- settings ----------------
-  const DEFAULTS = { res: 3, weight: 'Z', avg: 'fast', splW: 'A', splT: 'fast', calOffset: 120, calRef: 94, calDate: null, pro: false,
+  const DEFAULTS = { res: 3, weight: 'Z', avg: 'fast', splW: 'A', splT: 'fast', calOffset: 120, calRef: 94, calDate: null, pro: false, geqSet: 28,
     rtaTop: 100, rtaRange: 60, showLine: true, specSpan: 10, specRange: 60, genType: 'pink', genFreq: 1000, genLevel: -18, sweepDur: 5, deviceId: '' };
   const KEY = 'pocketrta.v1';
   const S = Object.assign({}, DEFAULTS);
@@ -301,7 +301,60 @@
   for (const w of W3) for (const t of T2) { L.hist[w + t] = new Float32Array(L.histN); }
   const CAL = { on: false, t: 0, acc: 0, dur: 3 };
 
-  function resetRTA() { R.init = false; R.sumT = 0; R.sum.fill(0); R.peak.fill(-300); }
+  function resetRTA() { R.init = false; R.sumT = 0; R.sum.fill(0); R.peak.fill(-300); G.init = false; G.run.fill(0); G.list = []; }
+
+  // ---------------- GEQ Assist: band set of the console's graphic EQ + ring-out detection ----------------
+  // res 0 = GEQ view: the 1/3-octave bars restricted to the bands your console's graphic EQ has. The ring-out helper looks for a
+  // narrow peak that stays well above its neighbours for a second, and says which fader to pull down and roughly how far.
+  const GEQ_RANGE = { 28: [31.5, 16000], 31: [20, 20000] };   // nominal centres, 1/3 octave
+  const GEQ_PROM = 10, GEQ_HOLD = 1.0, GEQ_FLOOR = 35, GEQ_NB = 10;   // dB above neighbours, seconds, dB SPL, fine bands each side (about 5/12 octave)
+  const G = { pw: new Float64Array(NF), db: new Float64Array(NF), dd: new Float64Array(NF), run: new Float64Array(NF), prom: new Float64Array(NF), init: false, acc: 0, list: [], cache: {} };
+  const resEff = () => (S.res === 0 ? 3 : S.res);
+  function geqBands() {
+    const k = S.geqSet === 31 ? 31 : 28;
+    return G.cache[k] || (G.cache[k] = BANDS[3].filter(b => b.nominal >= GEQ_RANGE[k][0] && b.nominal <= GEQ_RANGE[k][1]));
+  }
+  const curBands = () => (S.res === 0 ? geqBands() : BANDS[S.res]);
+  const tmpN = new Float64Array(2 * (GEQ_NB + 16) + 1);
+  function geqStep(dt, cal) {
+    const a = 1 - Math.exp(-dt / 0.2);
+    if (!G.init) { G.pw.set(RAW); G.init = true; G.acc = 0; } else for (let i = 0; i < NF; i++) G.pw[i] += (RAW[i] - G.pw[i]) * a;
+    G.acc += dt; if (G.acc < 0.05) return;
+    const step = G.acc; G.acc = 0;
+    // Work in dB per hertz so a tone is judged against its surroundings at the analyzer's real resolution:
+    // at low frequencies one FFT bin spans many 1/24-octave bands, and a plain band level would favour the widest of them.
+    for (let i = 0; i < NF; i++) { G.db[i] = pToDb(G.pw[i] * cal); G.dd[i] = G.db[i] - 10 * Math.log10(fHi[i] - fLo[i]); }
+    const binHz = (A.ctx ? A.ctx.sampleRate : 48000) / 8192;
+    for (let i = 1; i < NF - 1; i++) {
+      const ex = Math.min(16, Math.max(2, Math.ceil(binHz / (fC[i] * 0.029)) + 1));   // fine bands one FFT bin spans: keep the reference clear of the peak
+      let n = 0;
+      for (let j = Math.max(0, i - GEQ_NB - ex); j <= Math.min(NF - 1, i + GEQ_NB + ex); j++) if (Math.abs(j - i) >= ex) tmpN[n++] = G.dd[j];
+      const nb = tmpN.subarray(0, n).sort(), prom = G.dd[i] - nb[n >> 1];
+      G.prom[i] = prom;
+      if (prom >= GEQ_PROM && G.db[i] >= GEQ_FLOOR && G.dd[i] >= G.dd[i - 1] && G.dd[i] >= G.dd[i + 1]) G.run[i] += step;
+      else G.run[i] = Math.max(0, G.run[i] - 2 * step);
+    }
+    // peaks held long enough, grouped when contiguous and placed at their power-weighted centre
+    const bands = geqBands(), lo = bands[0].lo, hi = bands[bands.length - 1].hi, found = [], byBand = new Map();
+    for (let i = 1; i < NF - 1;) {
+      if (G.run[i] < GEQ_HOLD) { i++; continue; }
+      let sw = 0, swf = 0, prom = 0;
+      for (; i < NF - 1 && G.run[i] >= GEQ_HOLD; i++) { sw += G.pw[i]; swf += G.pw[i] * Math.log2(fC[i]); prom = Math.max(prom, G.prom[i]); }
+      found.push({ f: 2 ** (swf / sw), prom, lvl: pToDb(sw * cal) });
+    }
+    // a weaker peak within the window's main lobe (about 3 bins) of a louder one is that tone's skirt, not a second ring
+    found.sort((p, q) => q.lvl - p.lvl);
+    const kept = found.filter((c, k) => !found.slice(0, k).some(o => Math.abs(o.f - c.f) < 3.2 * binHz));
+    for (const c of kept) {
+      if (c.f < lo || c.f > hi) continue;
+      let bi = 0, best = 1e9;
+      for (let b = 0; b < bands.length; b++) { const d = Math.abs(Math.log2(c.f / bands[b].fc)); if (d < best) { best = d; bi = b; } }
+      if (byBand.has(bi)) continue;
+      const was = G.list.find(o => o.band === bands[bi].nominal), cut = clamp(Math.round(c.prom / 2), 2, 6);
+      byBand.set(bi, { bi, band: bands[bi].nominal, f: c.f, prom: c.prom, lvl: c.lvl, cut: was ? Math.max(was.cut, cut) : cut });   // hold the largest cut while the band stays listed, so the number does not flicker
+    }
+    G.list = [...byBand.values()].slice(0, 3);   // loudest first
+  }
   function resetPeaks() { R.peak.fill(-300); if (S.avg === 'inf') { R.sum.fill(0); R.sumT = 0; } }
   function resetSPL() { L.init = false; L.T = 0; for (const w of W3) L.E[w] = 0; L.histI = 0; L.histCount = 0; L.histAcc = 0; }
   function resetAll() { resetRTA(); resetSPL(); }
@@ -325,6 +378,7 @@
     }
     if (CAL.on) { CAL.acc += pZ * dt; CAL.t += dt; if (CAL.t >= CAL.dur) finishCal(); }
 
+    if (S.res === 0 && !R.frozen) geqStep(dt, cal);
     // ---- RTA averaging (power domain, selected weighting) ----
     const wt = WFINE[S.weight];
     if (!R.frozen) {
@@ -335,7 +389,7 @@
         const a = 1 - Math.exp(-dt / TAU[S.avg]);
         for (let i = 0; i < NF; i++) R.avg[i] += (RAW[i] * wt[i] - R.avg[i]) * a;
       }
-      const bands = BANDS[S.res];
+      const bands = curBands();
       for (let b = 0; b < bands.length; b++) {
         let s = 0; for (let i = bands[b].i0; i < bands[b].i1; i++) s += R.avg[i];
         const db = pToDb(s * cal); R.disp[b] = db; if (db > R.peak[b]) R.peak[b] = db;
@@ -436,7 +490,7 @@
       gr.addColorStop(0, '#0B3550'); gr.addColorStop(0.45, '#1A8FC0'); gr.addColorStop(0.74, '#3FC1EE'); gr.addColorStop(0.87, C.amber); gr.addColorStop(1, C.red);
       cv._grad = gr; cv._gradKey = H + ':' + top;
     }
-    const bands = BANDS[S.res], gap = S.res >= 12 ? 1 : S.res >= 6 ? 1.5 : 2, dpr = DPR(), sn = v => Math.round(v * dpr) / dpr;   // snap to device pixels so edges stay crisp
+    const bands = curBands(), gap = S.res >= 12 ? 1 : S.res >= 6 ? 1.5 : 2, dpr = DPR(), sn = v => Math.round(v * dpr) / dpr;   // snap to device pixels so edges stay crisp
     g.fillStyle = cv._grad;
     for (let b = 0; b < bands.length; b++) {
       const lv = R.disp[b]; if (lv <= bot) continue;
@@ -448,9 +502,15 @@
     // peak hold: one device-pixel-thin cap
     g.fillStyle = C.amber;
     for (let b = 0; b < bands.length; b++) { const pk = R.peak[b]; if (pk <= bot) continue; const x0 = sn(x(bands[b].lo) + gap / 2), x1 = sn(x(bands[b].hi) - gap / 2); g.fillRect(x0, sn(y(pk)) - 1, x1 - x0, 2 / dpr * 1.5); }
+    // GEQ Assist: suggested fader cut above the offending band
+    if (S.res === 0) for (const s of G.list) {
+      const b = bands[s.bi]; if (!b) continue;
+      const cx = (x(b.lo) + x(b.hi)) / 2, yy = Math.max(y(Math.max(R.disp[s.bi], R.peak[s.bi])) - 6, Tm + 12);
+      g.fillStyle = C.red; g.font = `600 11px ${MONO}`; g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillText('−' + s.cut, cx, yy);
+    }
     // smoothed curve: fractional-octave smoothing of the fine data, scaled to the displayed bandwidth
     if (S.showLine) {
-      const per = 24 / S.res, half = Math.max(2, per / 2), cal = dbToP(S.calOffset);
+      const per = 24 / resEff(), half = Math.max(2, per / 2), cal = dbToP(S.calOffset);
       g.beginPath();
       let started = false, px = 0, py = 0;
       for (let i = 0; i < NF; i++) {
@@ -617,7 +677,7 @@
   }
   function syncSegs() { $$('[data-key]').forEach(seg => { const v = String(S[seg.dataset.key]); $$('button', seg).forEach(b => b.classList.toggle('on', b.dataset.v === v)); }); }
   function onSetting(key, changed) {
-    if (key === 'res') { R.peak.fill(-300); }
+    if (key === 'res' || key === 'geqSet') { R.peak.fill(-300); G.init = false; G.run.fill(0); G.list = []; }
     if (key === 'weight' && changed) { R.init = false; R.sum.fill(0); R.sumT = 0; R.peak.fill(-300); }
     if (key === 'avg') { R.sum.fill(0); R.sumT = 0; R.init = false; R.peak.fill(-300); }
     if (key === 'genType') {
@@ -637,7 +697,7 @@
   // Native bridge: { buyPro(): Promise<boolean>, restorePro(): Promise<boolean>, isPro(): Promise<boolean>, price?: string }
   const NATIVE = window.PocketRTANative || null;
   const GATED = !!NATIVE || Q.get('gate') === '1';
-  const PRO_TABS = ['spectro', 'gen'], PRO_RES = [6, 12];
+  const PRO_TABS = ['spectro', 'gen'], PRO_RES = [0, 6, 12];   // res 0 is GEQ Assist
   const isPro = () => !GATED || S.pro === true;
   let proAfter = null;
   function uiPro() {
@@ -731,6 +791,21 @@
   }
 
   // ---- per-frame text readouts (throttled for legibility) ----
+  const fmtBand = f => (f >= 1000 ? f / 1000 + ' kHz' : f + ' Hz');
+  function renderGeq() {
+    const on = S.res === 0; $('#geqPanel').hidden = !on; if (!on) return;
+    $('#geqSetTxt').textContent = (S.geqSet === 31 ? '31' : '28') + '-band GEQ';
+    const body = $('#geqBody'), key = G.list.map(s => s.band + ':' + s.cut).join('|');
+    if (body._key === key) return; body._key = key;
+    body.textContent = '';
+    if (!G.list.length) { const p = document.createElement('p'); p.textContent = 'Listening. Open the mics and raise the level slowly until it rings; a ringing band will show here.'; body.appendChild(p); return; }
+    for (const s of G.list) {
+      const row = document.createElement('div'); row.className = 'geq-row';
+      const f = document.createElement('b'); f.textContent = fmtBand(s.band);
+      const c = document.createElement('span'); c.textContent = 'pull the fader down about ' + s.cut + ' dB';
+      row.append(f, c); body.appendChild(row);
+    }
+  }
   let lastText = 0;
   const f1 = v => (v < -200 ? '--.-' : v.toFixed(1));
   function updateText(now) {
@@ -741,9 +816,10 @@
       let tot = 0; for (let i = 0; i < NF; i++) tot += R.avg[i];
       $('#rtaOverall').textContent = f1(pToDb(tot * dbToP(S.calOffset)));
       $('#rtaOverallU').textContent = `dB(${S.weight})`;
-      const bands = BANDS[S.res]; let bi = 0; for (let b = 1; b < bands.length; b++) if (R.disp[b] > R.disp[bi]) bi = b;
+      const bands = curBands(); let bi = 0; for (let b = 1; b < bands.length; b++) if (R.disp[b] > R.disp[bi]) bi = b;
       $('#rtaPeakF').textContent = fmtHzU(S.res <= 3 ? bands[bi].nominal : bands[bi].fc);
       $('#rtaPeakL').textContent = f1(R.disp[bi]) + ' dB';
+      renderGeq();
       $('#rtaAvgK').textContent = S.avg === 'inf' ? 'Inf' : S.avg === 'fast' ? 'Fast' : 'Slow';
       $('#rtaAvgT').textContent = S.avg === 'inf' ? fmtDur(R.sumT) : S.avg === 'fast' ? 'τ 125 ms' : 'τ 1 s';
     } else if (screen === 'spl') {
@@ -861,6 +937,6 @@
     if (Q.get('mic') === '1') enableMic();
     requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
   }
-  window.PocketRTA = { S, A, R, L, BANDS, isPro, show, enableMic, genStart, genStop, resetAll };
+  window.PocketRTA = { S, A, R, L, G, BANDS, isPro, show, enableMic, genStart, genStop, resetAll };
   init();
 })();

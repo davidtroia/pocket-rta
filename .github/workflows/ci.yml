@@ -21,6 +21,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm test
 
   # Publishes index.html to GitHub Pages. Runs only on main, after tests pass.
@@ -37,7 +39,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir _site && cp index.html _site/
+      # publish only what the app loads at runtime, not the store artwork or tooling
+      - run: |
+          mkdir -p _site/assets/brand
+          cp -r index.html css js fonts _site/
+          cp -r assets/icon _site/assets/
+          cp assets/brand/*.svg _site/assets/brand/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

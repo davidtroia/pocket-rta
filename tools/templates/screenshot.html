@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{width:1290px;height:2796px;position:relative}
+.cap{position:absolute;left:0;right:0;top:170px;text-align:center;padding:0 90px}
+.kick{font:600 38px/1 Montserrat;letter-spacing:.22em;text-transform:uppercase;color:#6F86B8;margin-bottom:34px}
+h1{font:700 104px/1.06 Montserrat;letter-spacing:-.02em}
+p{margin-top:34px;font:400 46px/1.38 Inter;color:#A3B0C2}
+.phone{position:absolute;left:50%;top:790px;width:1060px;transform:translateX(-50%);padding:26px;border-radius:150px;
+  background:linear-gradient(145deg,#2E3643,#12161C 42%,#1E2530);box-shadow:0 0 0 3px #3A4352,0 80px 160px rgba(0,0,0,.7),0 0 220px rgba(26,143,192,.16)}
+.phone img{display:block;width:1008px;border-radius:126px}
+.island{position:absolute;left:50%;top:60px;width:300px;height:88px;margin-left:-150px;border-radius:44px;background:#000}
+</style></head><body><div class="bg"></div>
+<div class="rings" style="width:1900px;height:1900px;top:420px"></div><div class="rings" style="width:1400px;height:1400px;top:670px"></div>
+<div class="cap"><div class="kick" id="k"></div><h1 id="h"></h1><p id="s"></p></div>
+<div class="phone"><img id="img"><div class="island"></div></div>
+<script>const q=new URLSearchParams(location.search);document.getElementById('k').textContent=q.get('k');document.getElementById('h').innerHTML=q.get('h');document.getElementById('s').textContent=q.get('s');document.getElementById('img').src=q.get('img');</script>
+</body></html>

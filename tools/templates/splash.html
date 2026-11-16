@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{position:relative}
+.c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6%}
+.mark{width:38%}
+.name{margin-top:6%;font:600 calc(var(--w)*0.105px)/1 Montserrat;letter-spacing:-.01em}
+.name b{font-weight:700}
+.tag{margin-top:2.4%;font:500 calc(var(--w)*0.03px)/1 Inter;letter-spacing:.24em;text-transform:uppercase;color:#7F8FA8}
+.foot{position:absolute;left:0;right:0;bottom:7.5%;display:flex;flex-direction:column;align-items:center;gap:calc(var(--w)*0.02px)}
+.by{font:500 calc(var(--w)*0.024px)/1 Inter;letter-spacing:.3em;text-transform:uppercase;color:#5E6C7E}
+.foot img{width:26%}
+</style></head><body><div class="bg"></div>
+<div class="c"><img class="mark" src="../../assets/icon/pocket-rta-mark.svg"><div class="name">Pocket <b class="grad">RTA</b></div><div class="tag">Real-time audio analysis</div></div>
+<div class="foot"><span class="by">by</span><img src="../../assets/brand/balance-digital-logo-dark.svg"></div>
+<script>const q=new URLSearchParams(location.search);const w=+q.get('w'),h=+q.get('h');document.body.style.cssText=`width:${w}px;height:${h}px;--w:${w}`;</script>
+</body></html>

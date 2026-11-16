@@ -1,0 +1,12 @@
+@font-face{font-family:Inter;font-weight:400;src:url(../../fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:Inter;font-weight:500;src:url(../../fonts/inter-latin-500-normal.woff2)}
+@font-face{font-family:Montserrat;font-weight:600;src:url(../../fonts/montserrat-latin-600-normal.woff2)}
+@font-face{font-family:Montserrat;font-weight:700;src:url(../../fonts/montserrat-latin-700-normal.woff2)}
+*{box-sizing:border-box;margin:0}
+html,body{background:#05070A;color:#E8EEF6;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+.bg{position:absolute;inset:0;background:
+  radial-gradient(60% 38% at 50% 34%,rgba(26,143,192,.30),rgba(26,143,192,0) 70%),
+  radial-gradient(50% 30% at 85% 85%,rgba(169,139,208,.16),rgba(169,139,208,0) 70%),
+  linear-gradient(180deg,#0B1320 0%,#06090E 55%,#05070A 100%)}
+.rings{position:absolute;left:50%;border-radius:50%;border:2px solid rgba(111,134,184,.13);transform:translateX(-50%)}
+.grad{background:linear-gradient(90deg,#2BB3E8,#C3AEEA);-webkit-background-clip:text;background-clip:text;color:transparent}

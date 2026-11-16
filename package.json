@@ -3,5 +3,8 @@
   "private": true,
   "scripts": {
     "test": "node test/dsp.test.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
   }
 }

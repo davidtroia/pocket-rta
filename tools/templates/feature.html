@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{width:1024px;height:500px;position:relative}
+.bg{background:radial-gradient(50% 80% at 76% 50%,rgba(26,143,192,.32),rgba(26,143,192,0) 70%),radial-gradient(40% 60% at 15% 90%,rgba(169,139,208,.14),rgba(169,139,208,0) 70%),linear-gradient(120deg,#0C1524,#05070A 70%)}
+.l{position:absolute;left:64px;top:0;bottom:0;width:520px;display:flex;flex-direction:column;justify-content:center}
+.wm{display:flex;align-items:center;gap:18px}
+.wm img{width:84px;height:84px}
+.wm span{font:600 58px/1 Montserrat;letter-spacing:-.01em}.wm b{font-weight:700}
+h2{margin-top:30px;font:600 30px/1.25 Montserrat;color:#E8EEF6}
+p{margin-top:14px;font:400 17px/1.5 Inter;color:#9AA8BB;max-width:440px}
+.by{margin-top:30px;display:flex;align-items:center;gap:12px;font:500 12px/1 Inter;letter-spacing:.26em;color:#5E6C7E;text-transform:uppercase}
+.by img{height:44px}
+.ph{position:absolute;right:56px;top:34px;width:300px;padding:9px;border-radius:44px;background:linear-gradient(145deg,#2E3643,#12161C 42%,#1E2530);box-shadow:0 0 0 1px #3A4352,0 30px 60px rgba(0,0,0,.6);transform:rotate(-8deg);transform-origin:50% 0}
+.ph img{display:block;width:282px;border-radius:36px}
+.rings{border-color:rgba(111,134,184,.14)}
+</style></head><body><div class="bg"></div>
+<div class="rings" style="width:760px;height:760px;top:-130px;left:840px"></div>
+<div class="l"><div class="wm"><img src="../../assets/icon/pocket-rta-mark.svg"><span>Pocket <b class="grad">RTA</b></span></div>
+<h2>Real-time analyzer &amp; SPL meter<br>for sound engineers</h2>
+<p>1/3-octave RTA, SPL with Leq, waterfall spectrogram and a built-in signal generator.</p>
+<div class="by">by <img src="../../assets/brand/balance-digital-logo-dark.svg"></div></div>
+<div class="ph"><img id="img"></div>
+<script>document.getElementById('img').src=new URLSearchParams(location.search).get('img');</script>
+</body></html>

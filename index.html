@@ -1,448 +1,227 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050506">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#05070A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Pocket RTA</title>
-<style>
-  :root{
-    --bg:#050506; --panel:#111114; --line:#1f1f24;
-    --txt:#f4f4f6; --dim:#7a7a84; --accent:#3ee0a0; --peak:#ff9a2e; --bad:#ff4d4f;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
-    -webkit-user-select:none;user-select:none;overscroll-behavior:none}
-  #app{display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);position:relative}
-
-  header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 4px}
-  .brand{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-weight:500}
-  .status{font-size:10px;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--dim);letter-spacing:.06em}
-  .status.live{color:var(--accent);border-color:rgba(62,224,160,.4)}
-
-  .readout{display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:0 16px 2px}
-  .spl{font-size:clamp(64px,19vw,112px);font-weight:200;line-height:.85;letter-spacing:-.04em;
-    font-variant-numeric:tabular-nums;color:#fff}
-  .unit{font-size:13px;color:var(--dim);padding-bottom:12px;letter-spacing:.1em;font-weight:500}
-
-  .sub{display:flex;justify-content:space-between;gap:6px;padding:6px 18px 2px;font-size:11px;color:var(--dim);letter-spacing:.04em}
-  .sub b{color:var(--txt);font-weight:500;font-variant-numeric:tabular-nums}
-
-  .peakband{margin:4px 16px 0;padding:8px 12px;border:1px solid var(--line);border-radius:10px;
-    background:var(--panel);display:flex;justify-content:space-between;align-items:center;font-size:12px}
-  .peakband .f{font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;color:#fff}
-
-  #scope{flex:1;min-height:0;display:block;width:100%;touch-action:none;background:linear-gradient(180deg,#050506 0%,#0a0a0c 100%)}
-
-  .disclaimerbar{text-align:center;font-size:9px;color:#4a4a52;letter-spacing:.08em;padding:2px 0 0}
-  .controls{display:flex;gap:6px;padding:6px 12px 8px;flex-wrap:wrap;justify-content:center}
-  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
-  .seg button{background:none;border:0;color:var(--dim);font-size:11px;padding:7px 10px;
-    font-family:inherit;letter-spacing:.05em;transition:all .15s ease}
-  .seg button.on{background:#1c1c22;color:#fff}
-  .btn{border:1px solid var(--line);background:var(--panel);color:var(--dim);border-radius:8px;
-    padding:7px 12px;font-size:11px;font-family:inherit;letter-spacing:.05em;transition:all .15s ease}
-  .btn.on{color:var(--peak);border-color:rgba(255,154,46,.45);background:#1a1612}
-
-  .watermark{position:absolute;bottom:6px;right:10px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.12);pointer-events:none;z-index:5;font-weight:500}
-  .start-watermark{position:absolute;bottom:18px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.18);font-weight:500}
-
-  .start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:16px;background:var(--bg);padding:32px;text-align:center;z-index:10}
-  .start h1{font-size:28px;font-weight:300;margin:0;letter-spacing:-.02em}
-  .start p{color:var(--dim);font-size:13px;line-height:1.5;max-width:30ch;margin:0}
-  .go{background:var(--accent);color:#031a0e;border:0;border-radius:99px;padding:15px 36px;
-    font-size:15px;font-weight:600;font-family:inherit;letter-spacing:.02em}
-  .err{color:var(--bad);font-size:13px;max-width:34ch;line-height:1.45}
-  .fineprint{color:#5a5a64;font-size:11px;line-height:1.55;max-width:34ch}
-  .diag{font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:#6a6a74;max-width:36ch;white-space:pre-wrap;word-break:break-word;text-align:left;margin-top:4px}
-  .cal{display:none;position:absolute;inset:auto 0 0 0;background:var(--panel);border-top:1px solid var(--line);
-    padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:9}
-  .cal.show{display:block}
-  .cal .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-  .cal input[type=range]{width:100%;accent-color:var(--accent)}
-  .cal small{color:var(--dim);font-size:11px;line-height:1.45;display:block}
-  .mono{font-variant-numeric:tabular-nums;font-size:14px}
-</style>
+<meta name="description" content="Pocket RTA by Balance Digital LLC: real-time analyzer, SPL meter, spectrogram and signal generator for sound engineers.">
+<title>Pocket RTA · Balance Digital</title>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon/web/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon/ios/icon-180.png">
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<div id="app">
-  <header>
-    <div class="brand">Pocket RTA</div>
-    <div class="status" id="status">idle</div>
-  </header>
+<div class="stage" id="stage">
+  <div class="device" id="device">
+    <div class="app" id="app">
+      <div class="statusbar" aria-hidden="true">
+        <span class="sb-time">9:41</span>
+        <span class="sb-island"></span>
+        <span class="sb-icons">
+          <svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.3 2.5l1.2-1.3A10.6 10.6 0 0 0 8 .4 10.6 10.6 0 0 0 .5 3.4l1.2 1.3A9 9 0 0 1 8 2.2Zm0 3.6c1.4 0 2.7.5 3.7 1.4l1.2-1.3A7.2 7.2 0 0 0 8 4a7.2 7.2 0 0 0-4.9 1.9l1.2 1.3c1-.9 2.3-1.4 3.7-1.4Zm0 3.6c.5 0 1 .2 1.3.5L8 11.6 6.7 9.9c.3-.3.8-.5 1.3-.5Z"/></svg>
+          <svg viewBox="0 0 27 12" width="27" height="12"><rect x=".5" y=".5" width="23" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="20" height="8" rx="2"/><path d="M25 4v4c.8-.3 1.4-1.1 1.4-2S25.8 4.3 25 4Z" opacity=".45"/></svg>
+        </span>
+      </div>
 
-  <div class="readout">
-    <div class="spl" id="spl">--.-</div>
-    <div class="unit" id="wunit">dB SPL · A</div>
-  </div>
+      <header class="topbar">
+        <div class="brand">
+          <img src="assets/icon/pocket-rta-mark.svg" alt="" class="brand-mark" width="28" height="28">
+          <div class="brand-name">Pocket <b>RTA</b></div>
+        </div>
+        <div class="top-right">
+          <div class="inmeter-wrap" title="Input peak level (dBFS)"><span class="inmeter-k">IN</span><div class="inmeter"><div class="inmeter-fill" id="inFill"></div></div></div>
+          <button class="src-chip" id="srcChip" type="button" aria-label="Input source">
+            <span class="src-dot"></span><span id="srcLabel">SIM</span>
+          </button>
+        </div>
+      </header>
 
-  <div class="sub">
-    <div>Max <b id="maxspl">--.-</b></div>
-    <div>Leq <b id="leq">--.-</b></div>
-    <div>Peak <b id="bandtxt">--</b></div>
-  </div>
+      <main class="screens">
+        <!-- ================= RTA ================= -->
+        <section class="screen" data-screen="rta" aria-label="Real-time analyzer">
+          <div class="readouts">
+            <div class="ro"><span class="ro-k">Overall</span><span class="ro-v"><b id="rtaOverall">--.-</b><i id="rtaOverallU">dB(Z)</i></span></div>
+            <div class="ro"><span class="ro-k">Peak band</span><span class="ro-v"><b id="rtaPeakF">--</b><i id="rtaPeakL">-- dB</i></span></div>
+            <div class="ro"><span class="ro-k">Averaging</span><span class="ro-v"><b id="rtaAvgK">Fast</b><i id="rtaAvgT">τ 125 ms</i></span></div>
+          </div>
+          <div class="plot"><canvas id="rtaCanvas"></canvas></div>
+          <div class="controls">
+            <div class="ctl-row">
+              <div class="ctl grow"><span class="ctl-k">Resolution</span>
+                <div class="seg" data-key="res"><button data-v="1">1/1</button><button data-v="3">1/3</button><button data-v="6">1/6</button><button data-v="12">1/12</button></div></div>
+            </div>
+            <div class="ctl-row">
+              <div class="ctl"><span class="ctl-k">Weighting</span>
+                <div class="seg" data-key="weight"><button data-v="Z">Z</button><button data-v="A">A</button><button data-v="C">C</button></div></div>
+              <div class="ctl grow"><span class="ctl-k">Averaging</span>
+                <div class="seg" data-key="avg"><button data-v="fast">Fast</button><button data-v="slow">Slow</button><button data-v="inf">Inf</button></div></div>
+            </div>
+            <div class="ctl-row">
+              <button class="btn toggle" id="freezeBtn" type="button"><svg viewBox="0 0 20 20"><path d="M10 1.5v17M2.6 5.75l14.8 8.5M2.6 14.25l14.8-8.5M7.5 2.8 10 4.5l2.5-1.7M7.5 17.2 10 15.5l2.5 1.7M2.2 8.6l2.6 1.4-2.6 1.4M17.8 8.6 15.2 10l2.6 1.4"/></svg><span>Freeze</span></button>
+              <button class="btn" id="peakResetBtn" type="button"><svg viewBox="0 0 20 20"><path d="M3 4h14M5 8h10M3.5 16.5a6.5 6.5 0 0 1 13 0"/><path d="M14 13.5l2.5 3 3-2"/></svg><span>Reset peaks</span></button>
+              <button class="btn" id="lineBtn" type="button" aria-pressed="true"><svg viewBox="0 0 20 20"><path d="M1.5 14c2.5 0 3-6 5.5-6s2.5 4 5 4 3-7 6.5-7"/></svg><span>Curve</span></button>
+            </div>
+          </div>
+        </section>
 
-  <div class="peakband">
-    <div>Loudest</div>
-    <div class="f" id="loudest">--</div>
-  </div>
+        <!-- ================= SPL ================= -->
+        <section class="screen" data-screen="spl" aria-label="SPL meter">
+          <div class="card spl-main">
+            <div class="spl-top"><span class="tag" id="splTag">LAF</span><span class="spl-cal" id="splCal">Uncalibrated</span></div>
+            <div class="spl-read"><b id="splValue">--.-</b><span>dB SPL</span></div>
+            <div class="meterbar"><div class="meterbar-track"><div class="meterbar-fill" id="splFill"></div><div class="meterbar-peak" id="splPeak"></div></div>
+              <div class="meterbar-scale"><span>40</span><span>60</span><span>80</span><span>100</span><span>120</span></div></div>
+          </div>
+          <div class="stats">
+            <div class="stat"><span class="stat-k" id="kLeq">LAeq</span><b id="sLeq">--.-</b></div>
+            <div class="stat"><span class="stat-k" id="kMax">LAFmax</span><b id="sMax">--.-</b></div>
+            <div class="stat"><span class="stat-k" id="kMin">LAFmin</span><b id="sMin">--.-</b></div>
+          </div>
+          <div class="spl-dur"><span>Integration <b id="sDur">00:00:00</b></span><button class="btn small" id="splReset" type="button"><svg viewBox="0 0 20 20"><path d="M3.5 10a6.5 6.5 0 1 0 2-4.7M3.5 2.5v3.5H7"/></svg><span>Reset</span></button></div>
+          <div class="plot small-plot"><canvas id="splCanvas"></canvas></div>
+          <div class="controls">
+            <div class="ctl-row">
+              <div class="ctl grow"><span class="ctl-k">Frequency weighting</span>
+                <div class="seg" data-key="splW"><button data-v="A">A</button><button data-v="C">C</button><button data-v="Z">Z</button></div></div>
+              <div class="ctl grow"><span class="ctl-k">Time weighting</span>
+                <div class="seg" data-key="splT"><button data-v="fast">Fast</button><button data-v="slow">Slow</button></div></div>
+            </div>
+          </div>
+        </section>
 
-  <canvas id="scope"></canvas>
+        <!-- ================= SPECTROGRAM ================= -->
+        <section class="screen" data-screen="spectro" aria-label="Spectrogram">
+          <div class="readouts">
+            <div class="ro"><span class="ro-k">Dominant</span><span class="ro-v"><b id="spF">--</b><i id="spL">-- dB</i></span></div>
+            <div class="ro"><span class="ro-k">Span</span><span class="ro-v"><b id="spSpan">10 s</b><i>time ↓</i></span></div>
+            <div class="ro"><span class="ro-k">Scale</span><span class="ro-v"><b id="spScale">40–100</b><i id="spScaleU">dB(Z)</i></span></div>
+          </div>
+          <div class="plot"><canvas id="specCanvas"></canvas></div>
+          <div class="controls">
+            <div class="ctl-row">
+              <div class="ctl grow"><span class="ctl-k">History span</span>
+                <div class="seg" data-key="specSpan"><button data-v="10">10 s</button><button data-v="30">30 s</button><button data-v="60">60 s</button></div></div>
+              <div class="ctl grow"><span class="ctl-k">Dynamic range</span>
+                <div class="seg" data-key="specRange"><button data-v="40">40</button><button data-v="60">60</button><button data-v="80">80</button></div></div>
+            </div>
+            <div class="ctl-row">
+              <button class="btn toggle" id="specPause" type="button"><svg viewBox="0 0 20 20"><path d="M6.5 4v12M13.5 4v12"/></svg><span>Pause</span></button>
+              <button class="btn" id="specClear" type="button"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M5.5 6l1 10.5h7l1-10.5"/></svg><span>Clear</span></button>
+            </div>
+          </div>
+        </section>
 
-  <div class="disclaimerbar">Not a certified instrument · on-device only</div>
-  <div class="controls">
-    <div class="seg" id="weightSeg">
-      <button data-w="A" class="on">A</button><button data-w="C">C</button><button data-w="Z">Z</button>
+        <!-- ================= GENERATOR ================= -->
+        <section class="screen" data-screen="gen" aria-label="Signal generator">
+          <div class="gen-types seg-tiles" data-key="genType">
+            <button data-v="pink"><svg viewBox="0 0 40 24"><path d="M2 6c3 1 3 9 6 3s3 10 6 4 3 6 6 2 3 7 6 4 3 4 6 3 3 4 6 3"/></svg><span>Pink</span></button>
+            <button data-v="white"><svg viewBox="0 0 40 24"><path d="M2 12l2-8 2 15 2-11 2 9 2-13 2 16 2-10 2 7 2-12 2 14 2-9 2 6 2-11 2 13 2-8 2 5 2-4"/></svg><span>White</span></button>
+            <button data-v="sine"><svg viewBox="0 0 40 24"><path d="M2 12c4.5-13 9-13 13.5 0s9 13 13.5 0 6-8 9-8"/></svg><span>Sine</span></button>
+            <button data-v="sweep"><svg viewBox="0 0 40 24"><path d="M2 12c3-14 6-14 9 0s4.5 10 6.5 0 3-8 4.5 0 2 6 3 0 1.5-5 2.3 0 1-4 1.6 0 .8-3 1.2 0 .5-2 .9 0 .4-2 .7 0 .3-1.5.6 0"/></svg><span>Sweep</span></button>
+          </div>
+
+          <div class="card gen-card" data-for="pink">
+            <div class="gen-info-h">Pink noise</div>
+            <p>Equal energy per octave (−3 dB/octave). Reads flat on a fractional-octave RTA, which makes it the reference signal for tuning a system.</p>
+            <div class="gen-facts"><span>Crest factor <b>≈ 12 dB</b></span><span>Band <b>20 Hz – 20 kHz</b></span></div>
+          </div>
+          <div class="card gen-card" data-for="white">
+            <div class="gen-info-h">White noise</div>
+            <p>Equal energy per hertz, so it rises +3 dB/octave on an RTA. Useful for high-frequency driver checks. Keep the level low: most of its energy is in the treble.</p>
+            <div class="gen-facts"><span>Crest factor <b>≈ 12 dB</b></span><span>Band <b>DC – Nyquist</b></span></div>
+          </div>
+          <div class="card gen-card" data-for="sine">
+            <div class="gen-row-h"><span class="ctl-k">Frequency</span><b class="gen-big" id="genFreqTxt">1.00 kHz</b></div>
+            <input type="range" id="genFreq" min="0" max="1000" step="1" aria-label="Frequency">
+            <div class="gen-scale"><span>20</span><span>100</span><span>1k</span><span>10k</span><span>20k</span></div>
+            <div class="gen-steps">
+              <button class="btn small" data-step="-1">−⅓ oct</button>
+              <button class="chip" data-preset="100">100</button><button class="chip" data-preset="1000">1k</button><button class="chip" data-preset="4000">4k</button><button class="chip" data-preset="10000">10k</button>
+              <button class="btn small" data-step="1">+⅓ oct</button>
+            </div>
+          </div>
+          <div class="card gen-card" data-for="sweep">
+            <div class="gen-row-h"><span class="ctl-k">Log sweep 20 Hz → 20 kHz</span><b class="gen-big" id="sweepNow">20 Hz</b></div>
+            <div class="sweep-track"><div class="sweep-pos" id="sweepPos"></div></div>
+            <div class="gen-scale"><span>20</span><span>100</span><span>1k</span><span>10k</span><span>20k</span></div>
+            <div class="ctl"><span class="ctl-k">Sweep duration</span>
+              <div class="seg" data-key="sweepDur"><button data-v="1">1 s</button><button data-v="5">5 s</button><button data-v="10">10 s</button><button data-v="20">20 s</button></div></div>
+          </div>
+
+          <div class="card level-card">
+            <div class="gen-row-h"><span class="ctl-k">Output level <em id="genLevelKind">RMS</em></span><b class="gen-big" id="genLevelTxt">−18.0 dBFS</b></div>
+            <input type="range" id="genLevel" min="-60" max="-12" step="0.5" aria-label="Output level">
+            <div class="outmeter"><div class="outmeter-fill" id="outFill"></div><span id="outTxt">Output −∞ dBFS</span></div>
+          </div>
+
+          <div class="card gen-spec"><span class="ctl-k">Output spectrum · 1/3 octave</span><div class="plot"><canvas id="genCanvas"></canvas></div></div>
+
+          <button class="play" id="genPlay" type="button"><span class="play-ico"></span><span id="genPlayTxt">Start signal</span></button>
+          <p class="warn">Start low. Test signals at high level can damage loudspeakers and hearing.</p>
+        </section>
+
+        <!-- ================= SETTINGS ================= -->
+        <section class="screen" data-screen="settings" aria-label="Calibration and settings">
+          <div class="set-scroll">
+            <h3 class="set-h">Input</h3>
+            <div class="group">
+              <div class="row"><span>Source</span><b id="setSource">Simulated signal</b></div>
+              <div class="row"><span>Device</span><select id="devSelect" aria-label="Input device"><option value="">Default microphone</option></select></div>
+              <div class="row"><span>Sample rate</span><b id="setRate">—</b></div>
+              <div class="row"><span>Analyzer</span><b id="setFFT">8192-pt FFT · Blackman</b></div>
+              <div class="row"><span>Channels</span><b id="setCh">—</b></div>
+              <div class="row"><span>Processing</span><b>Raw · AGC/AEC/NS off</b></div>
+              <div class="row row-btn"><button class="btn wide accent" id="micToggle" type="button">Use microphone</button></div>
+            </div>
+
+            <h3 class="set-h">Calibration</h3>
+            <div class="group">
+              <div class="row"><span>Mic offset</span>
+                <div class="stepper"><button data-cal="-1" aria-label="Offset minus 1 dB">−1</button><button data-cal="-0.1" aria-label="Offset minus 0.1 dB">−.1</button><b id="calOffTxt">120.0 dB</b><button data-cal="0.1" aria-label="Offset plus 0.1 dB">+.1</button><button data-cal="1" aria-label="Offset plus 1 dB">+1</button></div></div>
+              <div class="row"><span>Reference level</span><div class="seg compact" data-key="calRef"><button data-v="94">94</button><button data-v="104">104</button><button data-v="114">114</button></div></div>
+              <div class="row"><span>Status</span><b id="calStatus">Uncalibrated (default offset)</b></div>
+              <div class="row row-btn">
+                <button class="btn wide accent" id="calBtn" type="button">Calibrate to reference</button>
+                <button class="btn wide" id="calResetBtn" type="button">Restore default</button>
+              </div>
+              <div class="calprog" id="calProg"><div id="calProgFill"></div></div>
+              <p class="note">Fit the calibrator to the mic, switch it on, then tap Calibrate. Pocket RTA measures the Z-weighted level for 3 seconds and sets the offset so the reading matches the reference. The default offset assumes a typical phone mic (94 dB SPL ≈ −26 dBFS). Phone and browser inputs are not Class 1 or Class 2 instruments.</p>
+            </div>
+
+            <h3 class="set-h">Display</h3>
+            <div class="group">
+              <div class="row"><span>Scale top</span><div class="seg compact" data-key="rtaTop"><button data-v="80">80</button><button data-v="100">100</button><button data-v="120">120</button><button data-v="140">140</button></div></div>
+              <div class="row"><span>RTA range</span><div class="seg compact" data-key="rtaRange"><button data-v="40">40</button><button data-v="60">60</button><button data-v="80">80</button></div></div>
+            </div>
+
+            <h3 class="set-h">About</h3>
+            <div class="group about">
+              <img src="assets/icon/pocket-rta-icon-rounded.svg" alt="Pocket RTA icon" class="about-icon" width="72" height="72">
+              <div class="about-name">Pocket RTA</div>
+              <div class="about-by">by Balance Digital LLC</div>
+              <div class="about-ver">Version 1.0 (100)</div>
+              <img src="assets/brand/balance-digital-logo-dark.svg" alt="Balance Digital" class="about-logo">
+              <div class="about-legal">© 2026 Balance Digital LLC · Mississippi, USA</div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <nav class="tabbar" aria-label="Screens">
+        <button data-tab="rta"><svg viewBox="0 0 24 24"><path d="M4 20V13M8 20V8M12 20V11M16 20V5M20 20V10"/></svg><span>RTA</span></button>
+        <button data-tab="spl"><svg viewBox="0 0 24 24"><path d="M3.5 16.5a8.5 8.5 0 1 1 17 0"/><path d="M12 16.5l4.2-5.2"/><circle cx="12" cy="16.5" r="1.4"/></svg><span>SPL</span></button>
+        <button data-tab="spectro"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9h17M3.5 14.5h17M9 3.5v17M14.5 3.5v17" opacity=".55"/></svg><span>Waterfall</span></button>
+        <button data-tab="gen"><svg viewBox="0 0 24 24"><path d="M2.5 12c2.4-7 4.8-7 7.2 0s4.8 7 7.2 0 3.6-4.5 4.6-4.5"/></svg><span>Generator</span></button>
+        <button data-tab="settings"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg><span>Settings</span></button>
+      </nav>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </div>
-    <div class="seg" id="respSeg">
-      <button data-r="fast" class="on">Fast</button><button data-r="slow">Slow</button>
-    </div>
-    <button class="btn" id="holdBtn">Hold</button>
-    <button class="btn" id="calBtn">Cal</button>
-    <button class="btn" id="resetBtn">Reset</button>
   </div>
-  <div class="watermark">Balance Digital</div>
+  <div class="desk-note" id="deskNote">Pocket RTA 1.0 · Balance Digital LLC &nbsp;·&nbsp; Keys <kbd>1</kbd>–<kbd>5</kbd> screens, <kbd>F</kbd> freeze, <kbd>R</kbd> reset peaks, <kbd>M</kbd> microphone</div>
 </div>
-
-<div class="start" id="start">
-  <h1>Pocket RTA</h1>
-  <p>Real-time analyzer and SPL meter. Point it at the room.</p>
-  <button class="go" id="goBtn">Start</button>
-  <div class="fineprint">Processed entirely on this device. Nothing is recorded or sent.<br>Not a certified instrument. Calibrate against a known reference.</div>
-  <div class="diag" id="diag"></div>
-  <div class="err" id="err"></div>
-  <div class="start-watermark">Balance Digital</div>
-</div>
-
-<div class="cal" id="calPanel">
-  <div class="row">
-    <div>Calibration offset</div>
-    <div class="mono" id="calVal">100.0 dB</div>
-  </div>
-  <input type="range" id="calRange" min="70" max="135" step="0.5" value="100">
-  <small>Match a reference meter or a known 1 kHz tone. Saved on this device.</small>
-</div>
-
-<script>
-(function(){
-  "use strict";
-
-  const CENTERS = [];
-  for (let k = -17; k <= 13; k++) CENTERS.push(1000 * Math.pow(2, k/3));
-  const EDGES = CENTERS.map(c => [c/Math.pow(2,1/6), c*Math.pow(2,1/6)]);
-  const NB = CENTERS.length;
-
-  function aWeight(f){
-    const f2=f*f;
-    const num=12194*12194*f2*f2;
-    const den=(f2+20.6*20.6)*Math.sqrt((f2+107.7*107.7)*(f2+737.9*737.9))*(f2+12194*12194);
-    return 20*Math.log10(num/den)+2.00;
-  }
-  function cWeight(f){
-    const f2=f*f;
-    const num=12194*12194*f2;
-    const den=(f2+20.6*20.6)*(f2+12194*12194);
-    return 20*Math.log10(num/den)+0.06;
-  }
-  const A_W = CENTERS.map(aWeight), C_W = CENTERS.map(cWeight), Z_W = CENTERS.map(()=>0);
-
-  const S = {
-    ctx:null, analyser:null, stream:null, buf:null, running:false, locked:false,
-    weighting:"A", response:"fast", offset:100, hold:false,
-    db:new Float32Array(NB), pw:new Float64Array(NB), peaks:new Float32Array(NB).fill(-200),
-    spl:0, splPow:0, maxSpl:0, leqSum:0, leqT:0, lastT:0, raf:0
-  };
-  const $ = id => document.getElementById(id);
-  const dbToPow = d => Math.pow(10, d/10);
-
-  const scope=$("scope"), g=scope.getContext("2d");
-  const dB_MIN=25, dB_MAX=110;
-  const PAD={l:36,r:8,t:8,b:18};
-
-  function sizeScope(){
-    const r=scope.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2.5);
-    scope.width=Math.max(1,Math.round(r.width*dpr));
-    scope.height=Math.max(1,Math.round(r.height*dpr));
-    g.setTransform(dpr,0,0,dpr,0,0);
-    S.w=r.width; S.h=r.height;
-  }
-  addEventListener("resize",()=>{sizeScope();});
-
-  function xFor(i){
-    const inner=S.w-PAD.l-PAD.r;
-    return PAD.l + inner*(i/(NB-1));
-  }
-  function yFor(db){
-    const inner=S.h-PAD.t-PAD.b;
-    const t=(db-dB_MIN)/(dB_MAX-dB_MIN);
-    return PAD.t+inner*(1-Math.max(0,Math.min(1,t)));
-  }
-
-  const GRID=[31.5,63,125,250,500,1000,2000,4000,8000,16000];
-  const lbl=f=>f>=1000?(f/1000)+"k":String(f);
-
-  function draw(){
-    if(!S.w) sizeScope();
-    g.clearRect(0,0,S.w,S.h);
-
-    // subtle grid
-    g.font="9px -apple-system,Helvetica,Arial";
-    g.textAlign="right"; g.textBaseline="middle";
-    for(let db=30; db<=110; db+=10){
-      const y=yFor(db);
-      g.strokeStyle= db%30===0 ? "#1c1c22" : "#141418";
-      g.lineWidth=1;
-      g.beginPath(); g.moveTo(PAD.l,y); g.lineTo(S.w-PAD.r,y); g.stroke();
-      g.fillStyle="#5a5a64"; g.fillText(db, PAD.l-6, y);
-    }
-
-    // bars
-    const inner=S.w-PAD.l-PAD.r;
-    const bw=Math.max(1.8, inner/NB-1.4);
-    for(let i=0;i<NB;i++){
-      const db=S.db[i];
-      const x=xFor(i);
-      if(db>-200){
-        const y=Math.max(yFor(db),PAD.t), y0=S.h-PAD.b;
-        const grad = g.createLinearGradient(0,y,0,y0);
-        grad.addColorStop(0,"#3ee0a0");
-        grad.addColorStop(0.6,"#22c55e");
-        grad.addColorStop(1,"#0f4c2a");
-        g.fillStyle=grad;
-        g.fillRect(x-bw/2, y, bw, Math.max(1,y0-y));
-      }
-      // peak hold
-      if(S.peaks[i]>-200){
-        const py=yFor(S.peaks[i]);
-        g.fillStyle="#ff9a2e";
-        g.fillRect(x-bw/2, py-0.5, bw, 1.5);
-      }
-    }
-
-    // labels
-    g.fillStyle="#5a5a64";
-    g.textAlign="center"; g.textBaseline="top";
-    for(const f of GRID){
-      let bi=0, best=1e9;
-      for(let i=0;i<NB;i++){ const d=Math.abs(CENTERS[i]-f); if(d<best){best=d;bi=i;} }
-      g.fillText(lbl(f), xFor(bi), S.h-PAD.b+4);
-    }
-
-    // canvas watermark
-    g.save();
-    g.font="10px -apple-system,Helvetica,Arial";
-    g.fillStyle="rgba(255,255,255,0.09)";
-    g.textAlign="left";
-    g.fillText("BALANCE DIGITAL", 8, S.h-6);
-    g.restore();
-  }
-
-  function analyse(){
-    const a=S.analyser;
-    a.getFloatFrequencyData(S.buf);
-    const sr=S.ctx.sampleRate, binHz=sr/a.fftSize;
-    const half=a.frequencyBinCount;
-
-    const bandPow=new Float64Array(NB);
-    for(let i=0;i<NB;i++){
-      const a=EDGES[i][0]/binHz, b=EDGES[i][1]/binHz;
-      const lo=Math.max(1,Math.floor(a+0.5)), hi=Math.min(half-1,Math.floor(b+0.5));
-      let sum=0;
-      for(let k=lo;k<=hi;k++){
-        const part=Math.min(b,k+0.5)-Math.max(a,k-0.5);
-        if(part>0) sum+=dbToPow(S.buf[k])*part;
-      }
-      bandPow[i]=sum;
-    }
-
-    const tau = S.response==="fast" ? 0.125 : 1.0;
-    const dt = S.lastT ? Math.min(0.25,(performance.now()-S.lastT)/1000) : 0.05;
-    const alpha = 1-Math.exp(-dt/tau);
-
-    const W = S.weighting==="A"?A_W:(S.weighting==="C"?C_W:Z_W);
-    let totalPow=0;
-    for(let i=0;i<NB;i++){
-      S.pw[i] = S.pw[i]===0 ? bandPow[i] : S.pw[i]+(bandPow[i]-S.pw[i])*alpha;
-      S.db[i] = S.pw[i]>0 ? 10*Math.log10(S.pw[i])+S.offset : -200;
-      totalPow += bandPow[i]*dbToPow(W[i]);
-    }
-
-    S.splPow = S.splPow===0 ? totalPow : S.splPow+(totalPow-S.splPow)*alpha;
-    S.spl = S.splPow>0 ? 10*Math.log10(S.splPow)+S.offset : 0;
-    if(S.spl>S.maxSpl) S.maxSpl=S.spl;
-
-    S.leqSum += totalPow*dt; S.leqT += dt;
-    S.lastT=performance.now();
-
-    if(!S.hold){
-      const decay=dt*5;
-      for(let i=0;i<NB;i++){
-        if(S.db[i]>S.peaks[i]) S.peaks[i]=S.db[i];
-        else S.peaks[i]=Math.max(-200,S.peaks[i]-decay);
-      }
-    }
-
-    let bi=0; for(let i=1;i<NB;i++) if(S.db[i]>S.db[bi]) bi=i;
-    const loudestF=CENTERS[bi];
-
-    $("spl").textContent = S.spl? S.spl.toFixed(1) : "--.-";
-    $("maxspl").textContent = S.maxSpl? S.maxSpl.toFixed(1) : "--.-";
-    const leq = S.leqSum>0 ? 10*Math.log10(S.leqSum/S.leqT)+S.offset : 0;
-    $("leq").textContent = leq? leq.toFixed(1) : "--.-";
-    const peakBand = CENTERS[bestPeak()];
-    $("bandtxt").textContent = lbl(Math.round(peakBand));
-    $("loudest").textContent = loudestF>=1000
-      ? (loudestF/1000).toFixed(2)+" kHz"
-      : Math.round(loudestF)+" Hz";
-    $("wunit").textContent = "dB SPL · "+S.weighting;
-  }
-
-  function bestPeak(){
-    let bi=0; for(let i=1;i<NB;i++) if(S.peaks[i]>S.peaks[bi]) bi=i; return bi;
-  }
-
-  function loop(){
-    if(!S.running) return;
-    analyse(); draw();
-    S.raf=requestAnimationFrame(loop);
-  }
-
-  function env(){
-    return {
-      secure: location.protocol==="https:" || window.isSecureContext===true,
-      md: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-      legacy: !!(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia),
-      inApp: /(FBAN|FBAV|Instagram|Line\/|WhatsApp|Snapchat|MicroMessenger|TikTok)/i.test(navigator.userAgent)
-    };
-  }
-
-  function showDiag(first, second){
-    const d=$("diag"); if(!d) return;
-    const e=env();
-    const bits=[e.secure?"secure":"NOT SECURE", e.md?"mic api":"no mic api"];
-    const lines=[first, second, bits.join("  ·  ")].filter(Boolean);
-    d.textContent=lines.join("\n");
-  }
-
-  function fail(msg){ $("err").textContent=msg; showDiag("stopped: "+msg); }
-
-  async function getStream(){
-    const opts={audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}};
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-      try{ return await navigator.mediaDevices.getUserMedia(opts); }
-      catch(err){
-        if(err && /Overconstrained|TypeError|NotSupported/i.test(err.name||"")){
-          return await navigator.mediaDevices.getUserMedia({audio:true});
-        }
-        throw err;
-      }
-    }
-    const legacy=navigator.getUserMedia||navigator.webkitGetUserMedia||navigator.mozGetUserMedia;
-    if(!legacy) throw new Error("No microphone API in this browser");
-    return await new Promise((res,rej)=>legacy.call(navigator,opts,s=>res(s),e=>rej(e)));
-  }
-
-  async function start(){
-    $("err").textContent="";
-    const e=env();
-    if(!e.secure) return fail("Open this page over HTTPS. Microphone access is blocked on http.");
-    if(!e.md && !e.legacy) return fail(e.inApp
-      ? "This in-app browser blocks the microphone. Open the link in Safari."
-      : "This browser does not offer microphone access.");
-
-    showDiag("asking for the microphone...");
-    try{
-      const stream = await getStream();
-      S.stream=stream;
-      const track=stream.getAudioTracks()[0];
-      if(!track) return fail("The browser returned no audio track.");
-      track.enabled=true;
-
-      S.ctx = new (window.AudioContext||window.webkitAudioContext)();
-      if(S.ctx.state==="suspended"){ try{ await S.ctx.resume(); }catch(_){} }
-      const src=S.ctx.createMediaStreamSource(stream);
-      const a=S.ctx.createAnalyser();
-      a.fftSize=8192; a.smoothingTimeConstant=0; a.minDecibels=-140; a.maxDecibels=0;
-      src.connect(a);
-      S.analyser=a; S.buf=new Float32Array(a.frequencyBinCount);
-      S.db=new Float32Array(NB).fill(-200); S.pw=new Float64Array(NB);
-      S.spl=0; S.splPow=0; S.maxSpl=0; S.leqSum=0; S.leqT=0;
-      S.running=true; S.lastT=0;
-      $("start").style.display="none";
-      $("status").textContent="live"; $("status").classList.add("live");
-      sizeScope(); loop();
-      showDiag("mic: "+(track.label||"default"), "audio "+(S.ctx.sampleRate||"?")+" Hz, "+S.ctx.state);
-
-      setTimeout(()=>{
-        if(!S.running) return;
-        let peak=-999; for(let i=0;i<NB;i++) if(S.db[i]>peak) peak=S.db[i];
-        if(peak<=-100){
-          $("err").textContent="The microphone is connected but returning silence. Check that nothing else is using it, and that the mic opening is not covered.";
-        }
-      },2500);
-
-      if("wakeLock" in navigator){ try{ S.locked=await navigator.wakeLock.request("screen"); }catch(_){} }
-    }catch(err){
-      const n=(err&&err.name)||"";
-      if(n==="NotAllowedError"||n==="SecurityError"){
-        fail("Microphone access was denied. In Safari: the aA menu, Website Settings, Microphone, Allow. Then reload.");
-      }else if(n==="NotFoundError"||n==="DevicesNotFoundError"){
-        fail("No microphone was found on this device.");
-      }else if(n==="NotReadableError"){
-        fail("Another app or tab is holding the microphone. Close it and try again.");
-      }else{
-        fail("Could not start: "+(n?n+": ":"")+(err&&err.message?err.message:String(err)));
-      }
-    }
-  }
-
-  $("goBtn").addEventListener("click",start);
-
-  document.querySelectorAll("#weightSeg button").forEach(b=>b.addEventListener("click",()=>{
-    document.querySelectorAll("#weightSeg button").forEach(x=>x.classList.remove("on"));
-    b.classList.add("on"); S.weighting=b.dataset.w;
-  }));
-  document.querySelectorAll("#respSeg button").forEach(b=>b.addEventListener("click",()=>{
-    document.querySelectorAll("#respSeg button").forEach(x=>x.classList.remove("on"));
-    b.classList.add("on"); S.response=b.dataset.r;
-  }));
-  $("holdBtn").addEventListener("click",()=>{
-    S.hold=!S.hold; $("holdBtn").classList.toggle("on",S.hold);
-  });
-  $("resetBtn").addEventListener("click",()=>{
-    S.peaks.fill(-200); S.maxSpl=0; S.leqSum=0; S.leqT=0;
-  });
-  $("calBtn").addEventListener("click",()=>{
-    const p=$("calPanel"); const open=p.classList.toggle("show");
-    $("calBtn").classList.toggle("on",open);
-    if(open) $("calRange").value=String(S.offset);
-  });
-  $("calRange").addEventListener("input",e=>{
-    S.offset=parseFloat(e.target.value);
-    $("calVal").textContent=S.offset.toFixed(1)+" dB";
-    try{ localStorage.setItem("prta_offset",String(S.offset)); }catch(err){}
-  });
-
-  const saved = (()=>{ try{ return parseFloat(localStorage.getItem("prta_offset")); }catch(e){ return NaN; } })();
-  if(!isNaN(saved)) S.offset=saved;
-  $("calRange").value=String(S.offset);
-  $("calVal").textContent=S.offset.toFixed(1)+" dB";
-
-  sizeScope();
-  draw();
-
-  const resume=()=>{ if(S.ctx && S.ctx.state==="suspended") S.ctx.resume().catch(()=>{}); };
-  document.addEventListener("touchstart",resume,{passive:true});
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) resume(); });
-
-  showDiag("ready");
-
-  window.__pocketRTA = { S, analyse, draw, start, CENTERS, A_W, C_W };
-})();
-</script>
+<script src="js/app.js"></script>
 </body>
 </html>

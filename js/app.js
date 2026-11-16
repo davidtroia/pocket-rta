@@ -121,7 +121,9 @@
     try {
       const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 1 } };
       if (S.deviceId) audio.deviceId = { exact: S.deviceId };
+      if (NATIVE && NATIVE.prepareAudio) await NATIVE.prepareAudio();   // measurement mode, loudspeaker output
       const stream = await navigator.mediaDevices.getUserMedia({ audio });
+      if (NATIVE && NATIVE.prepareAudio) await NATIVE.prepareAudio();   // WebKit can change the session when capture starts
       disableMic(true);
       A.stream = stream;
       A.micNode = ctx.createMediaStreamSource(stream);
@@ -715,7 +717,7 @@
     }
     uiPro();
   }
-  function openPro(after) { proAfter = after || null; $('#proSheet').hidden = false; $('#proSheetBuy').focus(); }
+  function openPro(after) { uiPro(); proAfter = after || null; $('#proSheet').hidden = false; $('#proSheetBuy').focus(); }
   function closePro() { $('#proSheet').hidden = true; proAfter = null; }
   function proUnlocked() { const after = proAfter; setPro(true); closePro(); toast('Pro unlocked. Thank you!'); if (after) after(); }
   async function buyPro() {
@@ -878,7 +880,7 @@
 
   // ---------------- wiring ----------------
   function init() {
-    const framed = Q.get('frame') === '1' || (Q.get('frame') !== '0' && window.innerWidth > 520 && window.innerHeight > 600);
+    const framed = !NATIVE && (Q.get('frame') === '1' || (Q.get('frame') !== '0' && window.innerWidth > 520 && window.innerHeight > 600));
     document.body.classList.toggle('framed', framed);
     if (Q.get('status') === '1') document.body.classList.add('status');
     if (Q.has('shot')) document.body.classList.add('shot');

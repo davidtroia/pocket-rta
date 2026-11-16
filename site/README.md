@@ -16,3 +16,7 @@ Pages: `index.html` (company), `pocket-rta.html` (product), `privacy.html`, `sup
 
 - Make sure `support@balancedigitalllc.com` receives mail (Cloudflare Email Routing can forward it to your own inbox for free). It is the address used on every page.
 - Have the privacy policy reviewed by a lawyer if you can; it is written to match what the app does today and must be updated if that changes.
+
+## If a deploy fails
+
+Open the failed build in Cloudflare (project, Settings, Builds, View build history) and read the end of its log. The repository side is checked with `npx wrangler deploy --dry-run`, which should read the files in `site/` without errors.

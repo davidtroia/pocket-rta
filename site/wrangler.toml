@@ -1,0 +1,9 @@
+# Serves the company site. Cloudflare builds with the root directory set to /site,
+# so this file lives here. Nothing to build.
+name = "balancedigitalllc"
+main = "../worker/index.js"
+compatibility_date = "2026-11-16"
+
+[assets]
+directory = "./"
+binding = "ASSETS"

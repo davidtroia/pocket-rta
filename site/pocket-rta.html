@@ -3,30 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pocket RTA by Balance Digital LLC</title>
+<title>Pocket RTA | Balance Digital LLC</title>
 <meta name="description" content="Pocket RTA: a real-time analyzer, SPL meter, signal generator and ring-out helper for iPhone, built for people who work in live sound.">
-<link rel="icon" href="img/pocket-rta-icon-192.png">
-<link rel="stylesheet" href="style.css">
+<link rel="canonical" href="https://balancedigitalllc.com/pocket-rta">
+<meta name="theme-color" content="#090d14">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/style.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Balance Digital LLC">
+<meta property="og:title" content="Pocket RTA | Balance Digital LLC">
+<meta property="og:description" content="Pocket RTA: a real-time analyzer, SPL meter, signal generator and ring-out helper for iPhone, built for people who work in live sound.">
+<meta property="og:url" content="https://balancedigitalllc.com/pocket-rta">
+<meta property="og:image" content="https://balancedigitalllc.com/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<header><div class="wrap">
-  <a class="logo" href="index.html" aria-label="Balance Digital LLC, home"><img src="img/balance-digital-logo.svg" alt="Balance Digital"></a>
-  <nav aria-label="Main"><a href="index.html">Home</a><a href="pocket-rta.html" aria-current="page">Pocket RTA</a><a href="support.html">Support</a></nav>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/" aria-label="Balance Digital LLC, home"><img src="/img/balance-digital-mark.svg" alt="" width="44" height="33"><span>Balance<small>Digital</small></span></a>
+  <nav class="nav" aria-label="Main"><a href="/products" aria-current="page">Products</a><a href="/about">About</a><a href="/support">Support</a><a href="/contact">Contact</a></nav>
 </div></header>
-
-<main><div class="wrap">
-  <h1>Pocket RTA</h1>
-  <p class="lead">A spectrum analyzer and SPL meter for live sound, in your pocket. Point it at the room, see what the system is doing, and fix it.</p>
-  <p class="note">Coming to the App Store. Pocket RTA is not a certified measurement instrument; readings depend on the microphone in your phone and on calibration.</p>
-
+<main id="main">
+<div class="page-head"><div class="wrap"><span class="eyebrow">Coming soon to the App Store</span><h1>Pocket RTA</h1><p class="lead">A spectrum analyzer and SPL meter for live sound, in your pocket. Point it at the room, see what the system is doing, and fix it.</p></div></div>
+<section style="padding-top:32px"><div class="wrap">
   <div class="shots">
-    <img src="img/shot-rta.png" alt="The analyzer screen: 1/3-octave bars with peak hold and a smoothed curve" width="390" height="844">
-    <img src="img/shot-spl.png" alt="The SPL screen: a large level readout with Leq, max and min" width="390" height="844">
-    <img src="img/shot-geq.png" alt="The GEQ view: the ring-out helper naming a fader to pull down" width="390" height="844">
+    <picture><source srcset="/img/rta-analyzer.webp" type="image/webp"><img src="/img/rta-analyzer.png" width="390" height="844" alt="The analyzer screen: 1/3-octave bars with peak hold and a smoothed curve"></picture>
+    <picture><source srcset="/img/rta-spl.webp" type="image/webp"><img src="/img/rta-spl.png" width="390" height="844" alt="The SPL screen: a large level readout with Leq, max and min" loading="lazy"></picture>
+    <picture><source srcset="/img/rta-waterfall.webp" type="image/webp"><img src="/img/rta-waterfall.png" width="390" height="844" alt="The waterfall screen: a scrolling spectrogram" loading="lazy"></picture>
+    <picture><source srcset="/img/rta-generator.webp" type="image/webp"><img src="/img/rta-generator.png" width="390" height="844" alt="The signal generator screen set to a sine tone" loading="lazy"></picture>
   </div>
-
+  <div class="prose" style="margin-top:48px">
   <h2>What it does</h2>
-  <ul>
+  <ul class="feat">
     <li><strong>Real-time analyzer.</strong> 1/1, 1/3, 1/6 and 1/12-octave views from 20 Hz to 20 kHz, with peak hold, A, C and Z weighting and Fast, Slow and Infinite averaging.</li>
     <li><strong>SPL meter.</strong> A, C and Z weighting, Fast and Slow response, Leq, max and min, and a two-minute level history.</li>
     <li><strong>Calibration.</strong> Match the reading to a reference meter or an acoustic calibrator, and the offset is saved on your device.</li>
@@ -34,17 +48,18 @@
     <li><strong>Waterfall.</strong> A scrolling spectrogram to see how the sound changes over time.</li>
     <li><strong>GEQ Assist.</strong> Shows the bands of your console's graphic EQ, finds a ringing frequency and tells you which fader to pull down and roughly how far. It only listens; you move the faders.</li>
   </ul>
-
+  <p class="note">Pocket RTA is not a certified measurement instrument. Readings depend on the microphone in your phone and on calibration.</p>
   <h2>Private by design</h2>
-  <p>Audio is processed on your device in real time. Nothing is recorded, stored or sent anywhere, and there are no accounts, ads or trackers. Read the <a href="privacy.html">privacy policy</a>.</p>
-
+  <p>Audio is processed on your device in real time. Nothing is recorded, stored or sent anywhere, and there are no accounts, ads or trackers. Read the <a href="/privacy#pocket-rta">privacy policy</a>.</p>
   <h2>Questions</h2>
-  <p>See <a href="support.html">support</a>, or write to <a href="mailto:support@balancedigitalllc.com">support@balancedigitalllc.com</a>.</p>
-</div></main>
-
-<footer><div class="wrap">
-  <span>&copy; 2026 Balance Digital LLC &middot; Mississippi, USA</span>
-  <span><a href="privacy.html">Privacy</a> &nbsp;&middot;&nbsp; <a href="support.html">Support</a></span>
+  <p>See <a href="/support">support</a>, or write to <a href="mailto:david@balancedigitalllc.com">david@balancedigitalllc.com</a>.</p>
+  </div>
+</div></section>
+</main>
+<footer class="site-footer"><div class="wrap">
+  <span>&copy; 2026 Balance Digital LLC &middot; Carriere, Mississippi, USA</span>
+  <nav aria-label="Footer"><a href="/products">Products</a><a href="/about">About</a><a href="/support">Support</a><a href="/contact">Contact</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Use</a></nav>
 </div></footer>
-</body>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"11803d24a19141c591b0c8c7471ef905","r":1,"spa":2}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a614b3ca1e5d0a81',t:'MTc5NTgxOTkzNg=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a614b3ca1e5d0a81',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
